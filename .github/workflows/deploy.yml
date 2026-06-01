@@ -98,22 +98,18 @@ jobs:
 
       - name: Secrets tekshirish
         run: |
-          if [ -z "${{ secrets.EC2_HOST }}" ]; then
-            echo "❌ EC2_HOST secret topilmadi!"
-            echo "Quyidagi secretlarni GitHub-ga qo'shimchali qiling:"
-            echo "1. EC2_HOST = 54.152.64.110"
-            echo "2. EC2_USERNAME = ubuntu"
-            echo "3. EC2_PRIVATE_KEY = (SSH private key)"
+          if [ -z "${{ secrets.HOST }}" ]; then
+            echo "❌ HOST secret topilmadi!"
             exit 1
           fi
-          echo "✅ EC2_HOST tayyor: ${{ secrets.EC2_HOST }}"
+          echo "✅ Secrets tayyor"
 
       - name: EC2 ga SSH orqali deploy qilish
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           timeout: 60s
           command_timeout: 10m
           script: |
