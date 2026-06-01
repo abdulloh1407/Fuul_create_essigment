@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moliya Nazorati - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-sky-400 mb-8 text-center">CRM NextGen</h1>
+            <nav class="space-y-2">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📊 1. Analitika</span></a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 2. Xodimlar (HRM)</span></a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🏢 3. Kompaniyalar</span></a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🌐 4. Global Leadlar</span></a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500"><span>💰 5. Moliya</span></a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📜 6. Audit Logs</span></a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ 7. Sozlamalar</span></a>
+            </nav>
+        </div>
+        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold">💰 Moliya va Kirim-Chiqim</h1>
+                <p class="text-sm text-slate-400 mt-1">Kassa holati va barcha pul amaliyotlarining to'liq tahlili.</p>
+            </div>
+            <button onclick="toggleModal(true)" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-5 py-2.5 rounded-lg transition">+ Amaliyot Qo'shish</button>
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jami Kirim</span>
+                <span class="text-3xl font-black text-emerald-400" id="totalIncome">$0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jami Chiqim</span>
+                <span class="text-3xl font-black text-rose-400" id="totalExpense">$0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Kassa Qoldig'i (Sof Foyda)</span>
+                <span class="text-3xl font-black text-sky-400" id="netProfit">$0</span>
+            </div>
+        </div>
+
+        <!-- TRANSACTION TABLE -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+                        <th class="p-4">Amal ID</th>
+                        <th class="p-4">Tegishli Mijoz (Lead)</th>
+                        <th class="p-4">Summa</th>
+                        <th class="p-4">Amal turi</th>
+                    </tr>
+                </thead>
+                <tbody id="financeTableBody">
+                    <!-- Dinamik yuklanadi -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="financeModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-xl shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 text-sky-400">Yangi Moliya Amaliyoti</h3>
+            <form id="addFinanceForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Mijoz (Ixtiyoriy)</label>
+                    <select id="financeClient" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                        <option value="">Mijozga bog'lanmagan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Summa (USD)</label>
+                    <input type="number" step="0.01" id="financeAmount" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white" placeholder="Masalan: 1500">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Amal Turi</label>
+                    <select id="financeType" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                        <option value="Kirim">Kirim (Daromad)</option>
+                        <option value="Chiqim">Chiqim (Xarajat)</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg transition">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-lg transition">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Xavfsizlik nazorati
+        const user = JSON.parse(localStorage.getItem('crm_user'));
+        if(!user || user.role !== 'admin') window.location.href = '/index.html';
+
+        function toggleModal(show) {
+            document.getElementById('financeModal').classList.toggle('hidden', !show);
+        }
+
+        async function initPage() {
+            try {
+                // Avval mijozlarni yuklash select dropdown uchun
+                const clientRes = await fetch('/api/global-leads');
+                const clients = await clientRes.json();
+                const select = document.getElementById('financeClient');
+                clients.forEach(c => {
+                    select.innerHTML += `<option value="${c.id}">${c.name} (${c.phone})</option>`;
+                });
+
+                // Keyin moliya loglarini yuklash
+                loadFinanceData();
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadFinanceData() {
+            try {
+                const res = await fetch('/api/finance');
+                const data = await res.json();
+                const tbody = document.getElementById('financeTableBody');
+                tbody.innerHTML = '';
+
+                let inc = 0;
+                let exp = 0;
+
+                data.forEach(item => {
+                    const amt = parseFloat(item.amount);
+                    if(item.type === 'Kirim') {
+                        inc += amt;
+                    } else {
+                        exp += amt;
+                    }
+
+                    const badgeColor = item.type === 'Kirim' 
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
+                            <td class="p-4 text-slate-400 font-mono">#TR-${item.id}</td>
+                            <td class="p-4 font-semibold text-white">${item.client_name || '<span class="text-slate-500">Umumiy tizim</span>'}</td>
+                            <td class="p-4 font-bold text-white">$${amt.toLocaleString()}</td>
+                            <td class="p-4"><span class="px-2.5 py-1 rounded text-xs font-bold ${badgeColor}">${item.type}</span></td>
+                        </tr>
+                    `;
+                });
+
+                // Statistikani hisoblash
+                document.getElementById('totalIncome').innerText = `$${inc.toLocaleString()}`;
+                document.getElementById('totalExpense').innerText = `$${exp.toLocaleString()}`;
+                document.getElementById('netProfit').innerText = `$${(inc - exp).toLocaleString()}`;
+
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('addFinanceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const client_id = document.getElementById('financeClient').value;
+            const payload = {
+                client_id: client_id ? parseInt(client_id) : null,
+                amount: parseFloat(document.getElementById('financeAmount').value),
+                type: document.getElementById('financeType').value
+            };
+
+            const res = await fetch('/api/finance', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                toggleModal(false);
+                document.getElementById('addFinanceForm').reset();
+                loadFinanceData();
+            } else { alert('Xatolik yuz berdi!'); }
+        });
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>

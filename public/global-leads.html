@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Leadlar Nazorati</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+
+    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-sky-400 mb-8 text-center">CRM NextGen</h1>
+            <nav class="space-y-2">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📊 1. Analitika</span></a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 2. Xodimlar (HRM)</span></a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🏢 3. Kompaniyalar</span></a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500"><span>🌐 4. Global Leadlar</span></a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>💰 5. Moliya</span></a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📜 6. Audit Logs</span></a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ 7. Sozlamalar</span></a>
+            </nav>
+        </div>
+        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+    </div>
+
+    <div class="flex-grow p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold">Global Leadlar va Taqsimot jurnali</h1>
+                <p class="text-sm text-slate-400 mt-1">Kelib tushgan buyurtmalarni xodimlarga taqsimlang yoki holatini kuzating.</p>
+            </div>
+            <button onclick="toggleLeadModal(true)" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-5 py-2.5 rounded-lg transition">+ Yangi Lead</button>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+                        <th class="p-4">Mijoz ismi</th>
+                        <th class="p-4">Telefon</th>
+                        <th class="p-4">Kompaniya</th>
+                        <th class="p-4">Byudjet</th>
+                        <th class="p-4">Status</th>
+                        <th class="p-4">Mas'ul Xodim (Agent)</th>
+                    </tr>
+                </thead>
+                <tbody id="leadsTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- LEAD MODAL -->
+    <div id="leadModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-xl shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 text-sky-400">Yangi Lead Qo'shish</h3>
+            <form id="addLeadForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Mijoz Ismi (F.I.SH)</label>
+                    <input type="text" id="leadName" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Telefon raqami</label>
+                    <input type="text" id="leadPhone" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white" placeholder="Masalan: +998901234567">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Kompaniya (Ixtiyoriy)</label>
+                    <select id="leadCompany" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                        <option value="">Shaxsiy (B2C) / Kompaniyasiz</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Dastlabki Byudjet (USD)</label>
+                    <input type="number" id="leadBudget" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white" placeholder="0">
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Mas'ul Xodim (Agent)</label>
+                    <select id="leadAssignee" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                        <option value="">Biriktirilmagan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Holati (Status)</label>
+                    <select id="leadStatus" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                        <option value="Yangi">Yangi</option>
+                        <option value="Jarayonda">Jarayonda</option>
+                        <option value="Muvaffaqiyatli">Muvaffaqiyatli</option>
+                    </select>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="toggleLeadModal(false)" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg transition">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-lg transition">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const userCheck = JSON.parse(localStorage.getItem('crm_user'));
+        if(!userCheck || userCheck.role !== 'admin') window.location.href = '/index.html';
+
+        let employeesList = [];
+
+        function toggleLeadModal(show) {
+            document.getElementById('leadModal').classList.toggle('hidden', !show);
+        }
+
+        async function initPage() {
+            try {
+                // Xodimlarni yuklab olamiz (Select menyular uchun)
+                const empRes = await fetch('/api/employees');
+                employeesList = await empRes.json();
+                
+                const leadAssigneeSelect = document.getElementById('leadAssignee');
+                leadAssigneeSelect.innerHTML = '<option value="">Biriktirilmagan</option>';
+                employeesList.forEach(emp => {
+                    if (emp.role === 'employee') {
+                        leadAssigneeSelect.innerHTML += `<option value="${emp.id}">${emp.full_name} (${emp.department || 'Bo\'limsiz'})</option>`;
+                    }
+                });
+
+                // Kompaniyalarni yuklab olamiz
+                const compRes = await fetch('/api/companies');
+                const companies = await compRes.json();
+                const leadCompanySelect = document.getElementById('leadCompany');
+                leadCompanySelect.innerHTML = '<option value="">Shaxsiy (B2C) / Kompaniyasiz</option>';
+                companies.forEach(c => {
+                    leadCompanySelect.innerHTML += `<option value="${c.id}">${c.company_name}</option>`;
+                });
+
+                // Keyin leadlarni yuklaymiz
+                loadGlobalLeads();
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadGlobalLeads() {
+            try {
+                const res = await fetch('/api/global-leads');
+                const leads = await res.json();
+                const tbody = document.getElementById('leadsTableBody');
+                tbody.innerHTML = '';
+
+                leads.forEach(lead => {
+                    // Mas'ul shaxs select qutisini yaratish
+                    let options = `<option value="">Biriktirilmagan</option>`;
+                    employeesList.forEach(emp => {
+                        options += `<option value="${emp.id}" ${lead.assigned_to === emp.id ? 'selected' : ''}>${emp.full_name}</option>`;
+                    });
+
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
+                            <td class="p-4 font-semibold text-white">${lead.name}</td>
+                            <td class="p-4 text-slate-300">${lead.phone}</td>
+                            <td class="p-4 text-slate-400">${lead.company_name || 'B2C (Shaxsiy)'}</td>
+                            <td class="p-4 text-amber-400 font-medium">$${parseFloat(lead.budget).toLocaleString()}</td>
+                            <td class="p-4">
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">${lead.status}</span>
+                            </td>
+                            <td class="p-4">
+                                <select onchange="assignLead(${lead.id}, this.value)" class="bg-slate-950 border border-slate-800 text-sm rounded-lg p-1.5 focus:border-sky-500 outline-none text-slate-300">
+                                    ${options}
+                                </select>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function assignLead(clientId, userId) {
+            if(!userId) return;
+            const res = await fetch('/api/global-leads/assign', {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ client_id: clientId, user_id: parseInt(userId) })
+            });
+            const data = await res.json();
+            if(data.success) {
+                console.log("Xodim muvaffaqiyatli biriktirildi");
+            } else { alert("Xatolik yuz berdi!"); }
+        }
+
+        document.getElementById('addLeadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                name: document.getElementById('leadName').value.trim(),
+                phone: document.getElementById('leadPhone').value.trim(),
+                company_id: document.getElementById('leadCompany').value ? parseInt(document.getElementById('leadCompany').value) : null,
+                budget: parseFloat(document.getElementById('leadBudget').value || '0'),
+                assigned_to: document.getElementById('leadAssignee').value ? parseInt(document.getElementById('leadAssignee').value) : null,
+                status: document.getElementById('leadStatus').value
+            };
+
+            const res = await fetch('/api/global-leads', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if(data.success) {
+                toggleLeadModal(false);
+                document.getElementById('addLeadForm').reset();
+                initPage();
+            } else { alert('Xatolik yuz berdi!'); }
+        });
+
+        window.onload = initPage;
+    </script>
+</body>
+</html>

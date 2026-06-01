@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Analitika</title>
+    <!-- Chart.js Grafiklarni chizish uchun -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --sidebar-bg: #1e293b;
+            --card-bg: #1e293b;
+            --accent-color: #38bdf8;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --logout-color: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR STYLES */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 1.5rem;
+        }
+
+        .sidebar-brand h2 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .sidebar-footer .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--logout-color);
+            color: var(--logout-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sidebar-footer .btn-logout:hover {
+            background-color: var(--logout-color);
+            color: #fff;
+        }
+
+        /* MAIN CONTENT AREA */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .user-info {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* STATS CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* CHARTS SECTION */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            height: 400px;
+            position: relative;
+        }
+
+        .chart-container h3 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- YON MENYU (SIDEBAR) -->
+    <div class="sidebar">
+        <div class="sidebar-brand">
+            <h2>CRM NextGen</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="/dashboard.html" class="active">📊 1. Analitika</a></li>
+            <li><a href="/employees.html">👥 2. Xodimlar (HRM)</a></li>
+            <li><a href="/companies.html">🏢 3. Kompaniyalar</a></li>
+            <li><a href="/global-leads.html">🌐 4. Global Leadlar</a></li>
+            <li><a href="/finance.html">💰 5. Moliya</a></li>
+            <li><a href="/audit-logs.html">📜 6. Audit Logs</a></li>
+            <li><a href="/settings.html">⚙️ 7. Sozlamalar</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-logout" onclick="logout()">Chiqish</button>
+        </div>
+    </div>
+
+    <!-- ASOSIY HISOBOT KISMI -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Vizual Analitika Dashboard</h1>
+            <div class="user-info" id="adminName">Admin: Yuklanmoqda...</div>
+        </div>
+
+        <!-- STATISTIKA KARTALARI -->
+        <div class="stats-grid">
+            <div class="card">
+                <span class="card-title">Jami Leadlar</span>
+                <span class="card-value" id="statTotal">0</span>
+            </div>
+            <div class="card">
+                <span class="card-title">Jarayondagilar</span>
+                <span class="card-value" style="color: #fbbf24;" id="statActive">0</span>
+            </div>
+            <div class="card">
+                <span class="card-title">Muvaffaqiyatli Bitimlar</span>
+                <span class="card-value" style="color: #34d399;" id="statSuccess">0</span>
+            </div>
+            <div class="card">
+                <span class="card-title">Umumiy Tushum (Kirim)</span>
+                <span class="card-value" style="color: #38bdf8;" id="statRevenue">$0</span>
+            </div>
+        </div>
+
+        <!-- GRAFIKLAR (CHART.JS) -->
+        <div class="charts-grid">
+            <!-- Dinamik Sotuv Grafigi -->
+            <div class="chart-container">
+                <h3>Sotuvlar Dinamikasi va Oylik Ko'rsatkich</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+
+            <!-- Leadlar holati (Donut) -->
+            <div class="chart-container">
+                <h3>Leadlar Taqsimoti</h3>
+                <canvas id="doughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Xavfsizlik tekshiruvi: Tizimga kirilmagan bo'lsa login sahifasiga qaytaradi
+        const user = JSON.parse(localStorage.getItem('crm_user'));
+        if (!user || user.role !== 'admin') {
+            window.location.href = '/index.html';
+        } else {
+            document.getElementById('adminName').innerText = `Admin: ${user.full_name}`;
+        }
+
+        function logout() {
+            localStorage.removeItem('crm_user');
+            window.location.href = '/index.html';
+        }
+
+        // Backenddan real statistik ma'lumotlarni yuklash va grafikni chizish
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+
+                // Kartalarga qiymat berish
+                document.getElementById('statTotal').innerText = data.total;
+                document.getElementById('statActive').innerText = data.active;
+                document.getElementById('statSuccess').innerText = data.success;
+                document.getElementById('statRevenue').innerText = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'USD' }).format(data.revenue);
+
+                // 1. Line Chart chizish (Trend uchun namunaviy oylar bilan)
+                const ctxLine = document.getElementById('lineChart').getContext('2d');
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun'],
+                        datasets: [{
+                            label: 'Muvaffaqiyatli Bitimlar ($)',
+                            data: [1200, 1900, data.revenue > 0 ? data.revenue : 3000, 5000, 4200, 6800],
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: '#f8fafc' } } },
+                        scales: {
+                            x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                            y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                        }
+                    }
+                });
+
+                // 2. Doughnut Chart chizish (Leadlar holati statusga qarab)
+                const ctxDonut = document.getElementById('doughnutChart').getContext('2d');
+                new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Yangi', 'Jarayonda', 'Muvaffaqiyatli', 'Yopilgan'],
+                        datasets: [{
+                            data: [data.total - data.active - data.success, data.active, data.success, 0],
+                            backgroundColor: ['#64748b', '#fbbf24', '#34d399', '#f87171'],
+                            borderWidth: 1,
+                            borderColor: '#1e293b'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc' } } }
+                    }
+                });
+
+            } catch (err) {
+                console.error("Ma'lumot yuklashda xatolik:", err);
+            }
+        }
+
+        // Sahifa yuklanganda ishga tushirish
+        window.onload = loadDashboardData;
+    </script>
+</body>
+</html>

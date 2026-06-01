@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xodim Analitika Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-emerald-400 mb-8 text-center font-mono">NextGen Agent</h1>
+            <nav class="space-y-2">
+                <a href="/employee-dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500"><span>📊 Shaxsiy Analitika</span></a>
+                <a href="/my-clients.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 Mening Mijozlarim</span></a>
+                <a href="/my-calls.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📞 Suhbatlar Jurnali</span></a>
+                <a href="/my-settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ Sozlamalar</span></a>
+            </nav>
+        </div>
+        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-8 overflow-y-auto">
+        <div class="mb-8 border-b border-slate-800 pb-4">
+            <h1 class="text-3xl font-bold" id="welcomeMessage">Xush kelibsiz, Agent!</h1>
+            <p class="text-sm text-slate-400 mt-1">Bugungi shaxsiy ko'rsatkichlaringiz va eng oxirgi amallaringiz monitoringi.</p>
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jami Mijozlarim</span>
+                <span class="text-3xl font-black text-white" id="personalTotal">0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jarayondagilar</span>
+                <span class="text-3xl font-black text-amber-400" id="personalActive">0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Muvaffaqiyatli bitimlar</span>
+                <span class="text-3xl font-black text-emerald-400" id="personalSuccess">0</span>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Men keltirgan tushum</span>
+                <span class="text-3xl font-black text-sky-400" id="personalRevenue">$0</span>
+            </div>
+        </div>
+
+        <!-- RECENT ACTIVITY / CALL LOGS -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl p-6">
+            <h3 class="text-lg font-bold text-emerald-400 mb-4">📞 Mening Oxirgi Muzokaralarim</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+                            <th class="p-3">Mijoz</th>
+                            <th class="p-3">Muzokara izohi</th>
+                            <th class="p-3">Sana va vaqt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentCallsTable">
+                        <!-- Dinamik yuklanadi -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const currentUser = JSON.parse(localStorage.getItem('crm_user'));
+        if(!currentUser || currentUser.role !== 'employee') window.location.href = '/index.html';
+
+        document.getElementById('welcomeMessage').innerText = `Xush kelibsiz, ${currentUser.full_name}!`;
+
+        async function loadDashboard() {
+            try {
+                // Shaxsiy statistikani olish
+                const statRes = await fetch(`/api/employee/dashboard/${currentUser.id}`);
+                const stats = await statRes.json();
+                
+                document.getElementById('personalTotal').innerText = stats.total;
+                document.getElementById('personalActive').innerText = stats.active;
+                document.getElementById('personalSuccess').innerText = stats.success;
+                document.getElementById('personalRevenue').innerText = `$${parseFloat(stats.revenue || '0').toLocaleString()}`;
+
+                // Oxirgi qo'ng'iroqlarni olish
+                const callRes = await fetch(`/api/call-history/${currentUser.id}`);
+                const calls = await callRes.json();
+                const tbody = document.getElementById('recentCallsTable');
+                tbody.innerHTML = '';
+
+                if(calls.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500">Hozircha suhbat qaydlari mavjud emas.</td></tr>`;
+                    return;
+                }
+
+                // Faqat oxirgi 5 tasini ko'rsatamiz
+                calls.slice(0, 5).forEach(call => {
+                    const formattedDate = new Date(call.created_at).toLocaleString('uz-UZ', {
+                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    });
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
+                            <td class="p-3 font-semibold text-white">${call.client_name}</td>
+                            <td class="p-3 text-slate-300 text-sm">${call.note}</td>
+                            <td class="p-3 text-slate-400 text-xs">${formattedDate}</td>
+                        </tr>
+                    `;
+                });
+
+            } catch (err) { console.error(err); }
+        }
+
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>

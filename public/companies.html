@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kompaniyalar Boshqaruvi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-sky-400 mb-8 text-center">CRM NextGen</h1>
+            <nav class="space-y-2">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📊 1. Analitika</span></a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 2. Xodimlar (HRM)</span></a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500"><span>🏢 3. Kompaniyalar</span></a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🌐 4. Global Leadlar</span></a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>💰 5. Moliya</span></a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📜 6. Audit Logs</span></a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ 7. Sozlamalar</span></a>
+            </nav>
+        </div>
+        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
+            <div>
+                <h1 class="text-3xl font-bold">🏢 B2B Kompaniyalar</h1>
+                <p class="text-sm text-slate-400 mt-1">Mijozlarimiz tegishli bo'lgan hamkor va mijoz kompaniyalar ro'yxati.</p>
+            </div>
+            <button onclick="toggleModal(true)" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-5 py-2.5 rounded-lg transition">+ Yangi Kompaniya</button>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
+                        <th class="p-4">Kompaniya nomi</th>
+                        <th class="p-4">ID raqami</th>
+                        <th class="p-4">Bog'langan mijozlar soni</th>
+                    </tr>
+                </thead>
+                <tbody id="companiesTableBody">
+                    <!-- Dinamik yuklanadi -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="companyModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-xl shadow-2xl">
+            <h3 class="text-xl font-bold mb-4 text-sky-400">Yangi Kompaniya Qo'shish</h3>
+            <form id="addCompanyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-1">Kompaniya Nomi</label>
+                    <input type="text" id="compName" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="toggleModal(false)" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg transition">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-lg transition">Saqlash</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Xavfsizlik nazorati
+        const user = JSON.parse(localStorage.getItem('crm_user'));
+        if(!user || user.role !== 'admin') window.location.href = '/index.html';
+
+        function toggleModal(show) {
+            document.getElementById('companyModal').classList.toggle('hidden', !show);
+        }
+
+        async function loadCompanies() {
+            try {
+                const res = await fetch('/api/companies');
+                const companies = await res.json();
+                const tbody = document.getElementById('companiesTableBody');
+                tbody.innerHTML = '';
+
+                if(companies.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500">Hech qanday kompaniya mavjud emas.</td></tr>`;
+                    return;
+                }
+
+                companies.forEach(comp => {
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
+                            <td class="p-4 font-semibold text-white">${comp.company_name}</td>
+                            <td class="p-4 text-slate-400">#${comp.id}</td>
+                            <td class="p-4 text-sky-400 font-bold">${comp.client_count || 0} ta mijoz</td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        document.getElementById('addCompanyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const company_name = document.getElementById('compName').value.trim();
+
+            const res = await fetch('/api/companies', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ company_name })
+            });
+            const data = await res.json();
+            if(data.success) {
+                toggleModal(false);
+                document.getElementById('addCompanyForm').reset();
+                loadCompanies();
+            } else { alert('Xatolik yuz berdi!'); }
+        });
+
+        window.onload = loadCompanies;
+    </script>
+</body>
+</html>

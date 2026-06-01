@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tizim Sozlamalari - CRM NextGen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+
+    <!-- SIDEBAR -->
+    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider text-sky-400 mb-8 text-center">CRM NextGen</h1>
+            <nav class="space-y-2">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📊 1. Analitika</span></a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 2. Xodimlar (HRM)</span></a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🏢 3. Kompaniyalar</span></a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🌐 4. Global Leadlar</span></a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>💰 5. Moliya</span></a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📜 6. Audit Logs</span></a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500"><span>⚙️ 7. Sozlamalar</span></a>
+            </nav>
+        </div>
+        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-8 overflow-y-auto">
+        <div class="mb-8 border-b border-slate-800 pb-4">
+            <h1 class="text-3xl font-bold">⚙️ Tizim va Profil Sozlamalari</h1>
+            <p class="text-sm text-slate-400 mt-1">CRM tizimi sozlamalari, joriy foydalanuvchi ma'lumotlari va xavfsizlik nazorati.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- PROFILE PROFILE -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <h3 class="text-xl font-bold text-sky-400 mb-4 border-b border-slate-800 pb-2">👤 Admin Profili</h3>
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-sm text-slate-400 block">Ism sharifi:</span>
+                        <span class="text-lg font-semibold text-white" id="profileName">Asosiy Admin</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-slate-400 block">Tizimdagi username (login):</span>
+                        <span class="text-lg font-semibold text-white font-mono" id="profileUsername">admin</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-slate-400 block">Ruxsat darajasi:</span>
+                        <span class="inline-block mt-1 px-3 py-1 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full text-xs font-bold uppercase">SYSTEM ADMINISTRATOR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYSTEM DETAILS -->
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
+                <h3 class="text-xl font-bold text-sky-400 mb-4 border-b border-slate-800 pb-2">💻 Tizim Ma'lumotlari</h3>
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-sm text-slate-400 block">Dastur versiyasi:</span>
+                        <span class="text-lg font-semibold text-white font-mono">v1.1.0 (Stable)</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-slate-400 block">Ma'lumotlar bazasi texnologiyasi:</span>
+                        <span class="text-lg font-semibold text-white">PostgreSQL (Relational Database)</span>
+                    </div>
+                    <div>
+                        <span class="text-sm text-slate-400 block">Ulanish holati:</span>
+                        <span class="inline-block mt-1 px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded text-xs font-bold">FAOL / ULANGAN</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DANGER ZONE -->
+            <div class="bg-slate-900 border border-red-500/20 p-6 rounded-2xl shadow-xl md:col-span-2">
+                <h3 class="text-xl font-bold text-rose-500 mb-4 border-b border-slate-800 pb-2">⚠️ Xavfli Hudud (Danger Zone)</h3>
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h4 class="font-semibold text-white text-lg">Ma'lumotlarni Qayta Sozlash</h4>
+                        <p class="text-sm text-slate-400 max-w-lg mt-1">Ushbu tugmani bosish orqali barcha leadlar, mijozlar va moliya amallari tozalanishi mumkin (Admin akkauntlari o'chirilmaydi).</p>
+                    </div>
+                    <button onclick="resetData()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold py-2.5 px-6 rounded-lg transition duration-300">
+                        CRM-ni Qayta Sozlash
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Xavfsizlik nazorati
+        const user = JSON.parse(localStorage.getItem('crm_user'));
+        if(!user || user.role !== 'admin') window.location.href = '/index.html';
+
+        document.getElementById('profileName').innerText = user.full_name;
+        document.getElementById('profileUsername').innerText = user.username;
+
+        function resetData() {
+            if(confirm("Haqiqatan ham barcha leadlar va moliyaviy ma'lumotlarni o'chirib yubormoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi!")) {
+                alert("Ma'lumotlar muvaffaqiyatli tozalandi (Namuna)!");
+            }
+        }
+    </script>
+</body>
+</html>
