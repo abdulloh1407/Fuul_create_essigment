@@ -114,7 +114,7 @@ jobs:
           command_timeout: 10m
           script: |
             set -e
-            echo "🚀 Deployment boshlandi..."
+            echo "🚀 Deploymenta boshlandi..."
             
             # Docker va Docker Compose o'rnatishni tekshirish
             echo "🐳 Docker tekshirish..."
