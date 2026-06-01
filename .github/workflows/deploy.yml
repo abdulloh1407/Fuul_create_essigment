@@ -116,6 +116,27 @@ jobs:
             set -e
             echo "🚀 Deployment boshlandi..."
             
+            # Docker va Docker Compose o'rnatishni tekshirish
+            echo "🐳 Docker tekshirish..."
+            if ! command -v docker &> /dev/null; then
+              echo "📦 Docker o'rnatilmoqda..."
+              sudo apt update
+              sudo apt install -y docker.io
+              sudo usermod -aG docker ubuntu
+              echo "✅ Docker o'rnatildi"
+            else
+              echo "✅ Docker allaqachon o'rnatilgan"
+            fi
+            
+            if ! command -v docker-compose &> /dev/null; then
+              echo "📦 Docker Compose o'rnatilmoqda..."
+              sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+              echo "✅ Docker Compose o'rnatildi"
+            else
+              echo "✅ Docker Compose allaqachon o'rnatilgan"
+            fi
+            
             # Papka yaratish
             mkdir -p /home/ubuntu/crm-system
             cd /home/ubuntu/crm-system
