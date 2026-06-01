@@ -128,8 +128,8 @@ jobs:
               echo "✅ Docker allaqachon o'rnatilgan"
             fi
             
-            # Docker Compose V2 o'rnatish (docker compose komandasini ishlatish uchun)
-            if ! docker compose version &> /dev/null; then
+            # Docker Compose standalone binary tekshirish
+            if ! test -f /usr/local/bin/docker-compose; then
               echo "📦 Docker Compose o'rnatilmoqda..."
               sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose
@@ -137,6 +137,11 @@ jobs:
             else
               echo "✅ Docker Compose allaqachon o'rnatilgan"
             fi
+            
+            # Docker service-ni ishga tushirish
+            echo "⚙️  Docker service-ni ishga tushirish..."
+            sudo systemctl start docker || true
+            sudo systemctl enable docker || true
             
             # Papka yaratish
             mkdir -p /home/ubuntu/crm-system
@@ -171,16 +176,26 @@ jobs:
             
             # Eski containerlarni to'xtatish
             echo "🛑 Eski containerlarni to'xtatish..."
-            sudo docker compose down --remove-orphans || true
+            sudo /usr/local/bin/docker-compose down --remove-orphans || true
             
             # Yangi image'ni build qilish va containerlarni ishga tushirish
             echo "🔨 Docker image'ni build qilish..."
-            sudo docker compose up -d --build
+            sudo /usr/local/bin/docker-compose up -d --build
             
             # Containerlar holati tekshirish
             echo "✅ Containerlar ishga tushdi"
-            sudo docker compose ps
+            sudo /usr/local/bin/docker-compose ps
             
             # Svezhta loglarni ko'rish
             echo "📋 Oxirgi loglar:"
-            sudo docker compose logs --tail=20
+            sudo /usr/local/bin/docker-compose logs --tail=20
+            
+            # Health check - serverni tekshirish
+            echo "🏥 Health check..."
+            sleep 5
+            if curl -s http://localhost:3000 > /dev/null; then
+              echo "✅ Application is running successfully!"
+            else
+              echo "⚠️  Application might not be ready yet, checking logs..."
+              sudo /usr/local/bin/docker-compose logs
+            fi
