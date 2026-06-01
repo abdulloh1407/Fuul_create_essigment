@@ -1,0 +1,47 @@
+name: Security Tekshiruvi
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Haftada bir marta ishga tushirish
+    - cron: '0 0 * * 1'
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Node.js o'rnatish
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Dependencies o'rnatish
+        run: npm ci
+      
+      - name: NPM security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Dependency kecha va yangilashlarni tekshirish
+        run: npm outdated || true
+  
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: CodeQL o'rnatish
+        uses: github/codeql-action/init@v2
+        with:
+          languages: 'javascript'
+      
+      - name: CodeQL tahlilini ishga tushirish
+        uses: github/codeql-action/analyze@v2

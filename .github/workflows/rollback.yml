@@ -1,0 +1,64 @@
+name: Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: 'Qaytariladigan commit hash yoki "previous"'
+        required: true
+        default: 'previous'
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Code-ni yuklash
+        uses: actions/checkout@v3
+      
+      - name: Rollback qilish
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 10m
+          script: |
+            set -e
+            echo "⏮️ Rollback boshlandi..."
+            
+            cd /home/ubuntu/crm-system || exit 1
+            
+            COMMIT_HASH="${{ github.event.inputs.commit_hash }}"
+            
+            if [ "$COMMIT_HASH" = "previous" ]; then
+              echo "📜 Oldingi commit-ga qaytarish..."
+              COMMIT_HASH=$(git log --oneline -2 | tail -1 | cut -d' ' -f1)
+            fi
+            
+            echo "🔄 Commit-ga qaytarish: $COMMIT_HASH"
+            
+            # Containerlarni to'xtatish
+            echo "🛑 Containerlarni to'xtatish..."
+            docker-compose down || true
+            
+            # Git historya orqali commit-ga qaytarish
+            git fetch origin
+            git reset --hard $COMMIT_HASH
+            
+            echo "🔨 Yangi build qilish..."
+            docker-compose up -d --build
+            
+            echo "⏱️ Containerlar ishga tushishi uchun kutish..."
+            sleep 10
+            
+            # Sog'lig'ini tekshirish
+            health=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+            
+            if [ "$health" = "200" ] || [ "$health" = "301" ]; then
+              echo "✅ Rollback muvaffaqiyatli! HTTP Status: $health"
+            else
+              echo "❌ Rollback-dan keyin muammo. HTTP Status: $health"
+              exit 1
+            fi

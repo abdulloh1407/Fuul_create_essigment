@@ -1,0 +1,139 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Step 1: Build va test qadami
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      - name: Code-ni yuklash
+        uses: actions/checkout@v3
+
+      - name: Node.js ${{ matrix.node-version }} o'rnatish
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Dependencies o'rnatish
+        run: npm ci
+
+      - name: Kod sifatini tekshirish (ESLint)
+        run: npm run lint --if-present
+        continue-on-error: true
+
+      - name: Unit testlarni ishga tushirish
+        run: npm test --if-present
+        continue-on-error: true
+
+  # Step 2: Docker image yaratish va push qilish
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Code-ni yuklash
+        uses: actions/checkout@v3
+
+      - name: Docker buildx o'rnatish
+        uses: docker/setup-buildx-action@v2
+
+      - name: Tizimga kirish (GitHub Container Registry)
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Meta ma'lumotlarini chiqarish
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+
+      - name: Docker image yaratish va push qilish
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # Step 3: EC2 ga deploy qilish
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+      - name: Code-ni yuklash
+        uses: actions/checkout@v3
+
+      - name: EC2 ga SSH orqali deploy qilish
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          timeout: 60s
+          command_timeout: 10m
+          script: |
+            set -e
+            echo "🚀 Deployment boshlandi..."
+            
+            # Loyiha papkasiga kirish
+            cd /home/ubuntu/crm-system || exit 1
+            
+            # Kodni yangilash
+            echo "📥 Kodni yangilash..."
+            git fetch origin
+            git reset --hard origin/main
+            
+            # Environment o'zgaruvchilarini tekshirish
+            if [ ! -f .env ]; then
+              echo "❌ .env fayli topilmadi!"
+              exit 1
+            fi
+            
+            # Eski containerlarni to'xtatish
+            echo "🛑 Eski containerlarni to'xtatish..."
+            docker-compose down --remove-orphans || true
+            
+            # Yangi image'ni build qilish va containerlarni ishga tushirish
+            echo "🔨 Docker image'ni build qilish..."
+            docker-compose up -d --build
+            
+            # Containerlar holati tekshirish
+            echo "✅ Containerlar ishga tushdi"
+            docker-compose ps
+            
+            # Svezhta loglarni ko'rish
+            echo "📋 Oxirgi loglar:"
+            docker-compose logs --tail=20

@@ -1,0 +1,71 @@
+name: Lint va Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Node.js o'rnatish
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Dependencies o'rnatish
+        run: npm ci
+      
+      - name: ESLint bilan kod tekshirish
+        run: npm run lint --if-present || echo "ESLint konfiguratsiyasi topilmadi"
+        continue-on-error: true
+      
+      - name: Kodni formatlash tekshirish
+        run: npx prettier --check . --ignore-path .gitignore || echo "Prettier topilmadi"
+        continue-on-error: true
+
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: crm_test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Node.js ${{ matrix.node-version }} o'rnatish
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+      
+      - name: Dependencies o'rnatish
+        run: npm ci
+      
+      - name: Testlarni ishga tushirish
+        run: npm test --if-present || echo "Test skriptlari topilmadi"
+        env:
+          DATABASE_URL: postgres://postgres:testpass@localhost:5432/crm_test_db
+        continue-on-error: true

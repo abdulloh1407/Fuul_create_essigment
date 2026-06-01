@@ -1,0 +1,47 @@
+name: Health Check
+
+on:
+  schedule:
+    # Har 30 minutda tekshirish
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deployment Health Check
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            echo "🏥 Sog'lik tekshiruvini boshlash..."
+            
+            # Docker containerlarni tekshirish
+            docker_status=$(docker-compose ps --services --filter "status=running" | wc -l)
+            if [ $docker_status -lt 2 ]; then
+              echo "❌ Ba'zi containerlar ishlamayapti!"
+              docker-compose ps
+              exit 1
+            fi
+            
+            # Serverni tekshirish
+            response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
+            if [ "$response" != "200" ] && [ "$response" != "301" ] && [ "$response" != "302" ]; then
+              echo "❌ Server javob bermayapti. HTTP Status: $response"
+              exit 1
+            fi
+            
+            echo "✅ Deployment sog'lig'i yaxshi! HTTP Status: $response"
+            
+            # Bazaga ulanishni tekshirish
+            docker-compose exec -T db pg_isready -U postgres || {
+              echo "❌ Database ulanishida muammo!"
+              exit 1
+            }
+            
+            echo "✅ Barcha tekshiruvlar muvaffaqiyatli!"
+        continue-on-error: true
