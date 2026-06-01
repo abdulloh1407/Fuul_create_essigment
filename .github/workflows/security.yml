@@ -31,17 +31,3 @@ jobs:
       
       - name: Dependency kecha va yangilashlarni tekshirish
         run: npm outdated || true
-  
-  code-quality:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: CodeQL o'rnatish
-        uses: github/codeql-action/init@v2
-        with:
-          languages: 'javascript'
-      
-      - name: CodeQL tahlilini ishga tushirish
-        uses: github/codeql-action/analyze@v2

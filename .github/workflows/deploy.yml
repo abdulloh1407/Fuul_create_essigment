@@ -116,8 +116,15 @@ jobs:
             set -e
             echo "🚀 Deployment boshlandi..."
             
-            # Loyiha papkasiga kirish
-            cd /home/ubuntu/crm-system || exit 1
+            # Papka yaratish
+            mkdir -p /home/ubuntu/crm-system
+            cd /home/ubuntu/crm-system
+            
+            # Agar repo klonlanmagan bo'lsa, klonlash
+            if [ ! -d .git ]; then
+              echo "📦 Repository klonlash..."
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
             
             # Kodni yangilash
             echo "📥 Kodni yangilash..."
@@ -126,7 +133,17 @@ jobs:
             
             # Environment o'zgaruvchilarini tekshirish
             if [ ! -f .env ]; then
-              echo "❌ .env fayli topilmadi!"
+              echo "⚠️  .env fayli topilmadi! Yuklarni qo'shimchali qiling:"
+              echo "   SSH orqali: ssh -i key.pem ubuntu@${{ secrets.HOST }}"
+              echo "   Keyin: cat > /home/ubuntu/crm-system/.env << EOF"
+              echo "   PORT=3000"
+              echo "   DB_USER=postgres"
+              echo "   DB_HOST=db"
+              echo "   DB_NAME=crm_db"
+              echo "   DB_PASSWORD=adminpassword"
+              echo "   DB_PORT=5432"
+              echo "   NODE_ENV=production"
+              echo "   EOF"
               exit 1
             fi
             
@@ -142,6 +159,6 @@ jobs:
             echo "✅ Containerlar ishga tushdi"
             docker-compose ps
             
-            # Svezhta loglarni ko'risha
+            # Svezhta loglarni ko'rish
             echo "📋 Oxirgi loglar:"
             docker-compose logs --tail=20
