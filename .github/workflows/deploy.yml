@@ -143,6 +143,12 @@ jobs:
             sudo systemctl start docker || true
             sudo systemctl enable docker || true
             
+            # Eski docker-compose binarni o'chirish agar konflikt bo'lsa
+            if [ -f /usr/local/bin/docker-compose ]; then
+              echo "🔄 Docker Compose pluginni tekshirish..."
+              sudo rm /usr/local/bin/docker-compose || true
+            fi
+            
             # Papka yaratish
             mkdir -p /home/ubuntu/crm-system
             cd /home/ubuntu/crm-system
@@ -176,19 +182,19 @@ jobs:
             
             # Eski containerlarni to'xtatish
             echo "🛑 Eski containerlarni to'xtatish..."
-            sudo /usr/local/bin/docker-compose down --remove-orphans || true
+            sudo docker compose down --remove-orphans || true
             
             # Yangi image'ni build qilish va containerlarni ishga tushirish
             echo "🔨 Docker image'ni build qilish..."
-            sudo /usr/local/bin/docker-compose up -d --build
+            sudo docker compose up -d --build
             
             # Containerlar holati tekshirish
             echo "✅ Containerlar ishga tushdi"
-            sudo /usr/local/bin/docker-compose ps
+            sudo docker compose ps
             
             # Svezhta loglarni ko'rish
             echo "📋 Oxirgi loglar:"
-            sudo /usr/local/bin/docker-compose logs --tail=20
+            sudo docker compose logs --tail=20
             
             # Health check - serverni tekshirish
             echo "🏥 Health check..."
@@ -197,5 +203,5 @@ jobs:
               echo "✅ Application is running successfully!"
             else
               echo "⚠️  Application might not be ready yet, checking logs..."
-              sudo /usr/local/bin/docker-compose logs
+              sudo docker compose logs
             fi
