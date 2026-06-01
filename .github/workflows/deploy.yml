@@ -170,16 +170,16 @@ jobs:
             
             # Eski containerlarni to'xtatish
             echo "🛑 Eski containerlarni to'xtatish..."
-            docker-compose down --remove-orphans || true
+            sudo docker-compose down --remove-orphans || true
             
             # Yangi image'ni build qilish va containerlarni ishga tushirish
             echo "🔨 Docker image'ni build qilish..."
-            docker-compose up -d --build
+            sudo docker-compose up -d --build
             
             # Containerlar holati tekshirish
             echo "✅ Containerlar ishga tushdi"
-            docker-compose ps
+            sudo docker-compose ps
             
             # Svezhta loglarni ko'rish
             echo "📋 Oxirgi loglar:"
-            docker-compose logs --tail=20
+            sudo docker-compose logs --tail=20
