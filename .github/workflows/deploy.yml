@@ -142,6 +142,6 @@ jobs:
             echo "✅ Containerlar ishga tushdi"
             docker-compose ps
             
-            # Svezhta loglarni ko'rish
+            # Svezhta loglarni ko'risha
             echo "📋 Oxirgi loglar:"
             docker-compose logs --tail=20
