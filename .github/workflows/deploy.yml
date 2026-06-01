@@ -96,6 +96,18 @@ jobs:
       - name: Code-ni yuklash
         uses: actions/checkout@v3
 
+      - name: Secrets tekshirish
+        run: |
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo "❌ EC2_HOST secret topilmadi!"
+            echo "Quyidagi secretlarni GitHub-ga qo'shimchali qiling:"
+            echo "1. EC2_HOST = 54.152.64.110"
+            echo "2. EC2_USERNAME = ubuntu"
+            echo "3. EC2_PRIVATE_KEY = (SSH private key)"
+            exit 1
+          fi
+          echo "✅ EC2_HOST tayyor: ${{ secrets.EC2_HOST }}"
+
       - name: EC2 ga SSH orqali deploy qilish
         uses: appleboy/ssh-action@master
         with:
