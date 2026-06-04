@@ -4,67 +4,221 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xodim Analitika Dashboard</title>
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseSlow: {
+                            '0%, 100%': { opacity: '0.15', transform: 'scale(1)' },
+                            '50%': { opacity: '0.25', transform: 'scale(1.15)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+<body class="bg-[#0b0f19] text-slate-100 flex flex-col md:flex-row min-h-screen font-sans overflow-x-hidden relative">
+    
+    <!-- Ambient background glow mesh (Emerald) -->
+    <div class="absolute top-10 left-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none animate-pulse-slow"></div>
+
+    <!-- Mobile Topbar Header -->
+    <div class="md:hidden flex items-center justify-between bg-slate-900/95 border-b border-slate-800/80 p-4 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center font-bold text-white font-mono text-xs shadow-md">NGA</div>
+            <span class="text-lg font-black tracking-wider text-emerald-400">NextGen Agent</span>
+        </div>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white focus:outline-none p-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity duration-300 md:hidden"></div>
 
     <!-- SIDEBAR -->
-    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
+    <div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 md:flex shrink-0 backdrop-blur-xl">
         <div>
-            <h1 class="text-2xl font-black tracking-wider text-emerald-400 mb-8 text-center font-mono">NextGen Agent</h1>
-            <nav class="space-y-2">
-                <a href="/employee-dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500"><span>📊 Shaxsiy Analitika</span></a>
-                <a href="/my-clients.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 Mening Mijozlarim</span></a>
-                <a href="/my-calls.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📞 Suhbatlar Jurnali</span></a>
-                <a href="/my-settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ Sozlamalar</span></a>
+            <!-- Brand Info -->
+            <div class="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-800/60 justify-center">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center font-extrabold text-white font-mono shadow-lg shadow-emerald-500/20">NGA</div>
+                <div class="flex flex-col">
+                    <span class="text-md font-black tracking-wider text-white">NextGen Agent</span>
+                    <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest font-mono">Xodim paneli</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1">
+                <a href="/employee-dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-emerald-500/10 text-emerald-400 font-semibold border-l-4 border-emerald-500 transition-all duration-200">
+                    <span class="text-lg">📊</span>
+                    <span>Shaxsiy Analitika</span>
+                </a>
+                <a href="/my-clients.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all duration-200">
+                    <span class="text-lg">👥</span>
+                    <span>Mening Mijozlarim</span>
+                </a>
+                <a href="/my-calls.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all duration-200">
+                    <span class="text-lg">📞</span>
+                    <span>Suhbatlar Jurnali</span>
+                </a>
+                <a href="/my-settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/5 transition-all duration-200">
+                    <span class="text-lg">⚙️</span>
+                    <span>Sozlamalar</span>
+                </a>
             </nav>
         </div>
-        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+        
+        <!-- Sidebar Footer -->
+        <div class="pt-4 border-t border-slate-800/60">
+            <button onclick="logout()" class="w-full py-3 bg-red-500/10 hover:bg-red-600 border border-red-500/20 text-red-500 hover:text-white rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2">
+                <span>🚪</span>
+                <span>Chiqish</span>
+            </button>
+        </div>
     </div>
 
     <!-- MAIN CONTENT -->
-    <div class="flex-grow p-8 overflow-y-auto">
-        <div class="mb-8 border-b border-slate-800 pb-4">
-            <h1 class="text-3xl font-bold" id="welcomeMessage">Xush kelibsiz, Agent!</h1>
-            <p class="text-sm text-slate-400 mt-1">Bugungi shaxsiy ko'rsatkichlaringiz va eng oxirgi amallaringiz monitoringi.</p>
-        </div>
-
-        <!-- STATS -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jami Mijozlarim</span>
-                <span class="text-3xl font-black text-white" id="personalTotal">0</span>
+    <div class="flex-grow p-6 md:p-8 overflow-y-auto w-full relative z-10">
+        <!-- Header welcome -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-5 border-b border-slate-800/80 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight" id="welcomeMessage">Xush kelibsiz, Agent!</h1>
+                <p class="text-sm text-slate-400 mt-1">Bugungi shaxsiy ko'rsatkichlaringiz, faollik grafiklaringiz va eslatmalar.</p>
             </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Jarayondagilar</span>
-                <span class="text-3xl font-black text-amber-400" id="personalActive">0</span>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Muvaffaqiyatli bitimlar</span>
-                <span class="text-3xl font-black text-emerald-400" id="personalSuccess">0</span>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-2">Men keltirgan tushum</span>
-                <span class="text-3xl font-black text-sky-400" id="personalRevenue">$0</span>
+            <div class="flex items-center space-x-3 bg-slate-900/60 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-800/80">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider font-mono">Agent statusi: On-line</span>
             </div>
         </div>
 
-        <!-- RECENT ACTIVITY / CALL LOGS -->
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl p-6">
-            <h3 class="text-lg font-bold text-emerald-400 mb-4">📞 Mening Oxirgi Muzokaralarim</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
-                            <th class="p-3">Mijoz</th>
-                            <th class="p-3">Muzokara izohi</th>
-                            <th class="p-3">Sana va vaqt</th>
-                        </tr>
-                    </thead>
-                    <tbody id="recentCallsTable">
-                        <!-- Dinamik yuklanadi -->
-                    </tbody>
-                </table>
+        <!-- STATS CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Mijozlarim (Jami)</span>
+                    <span class="text-xl bg-slate-800 p-2 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">👥</span>
+                </div>
+                <span class="text-3xl font-black text-white font-mono block tracking-tight" id="personalTotal">0</span>
+            </div>
+            
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-amber-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Jarayonda (Aktiv)</span>
+                    <span class="text-xl bg-slate-800 p-2 rounded-xl text-amber-400 group-hover:scale-110 transition-transform">⏳</span>
+                </div>
+                <span class="text-3xl font-black text-amber-400 font-mono block tracking-tight" id="personalActive">0</span>
+            </div>
+            
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Muvaffaqiyatli</span>
+                    <span class="text-xl bg-slate-800 p-2 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">🤝</span>
+                </div>
+                <span class="text-3xl font-black text-emerald-400 font-mono block tracking-tight" id="personalSuccess">0</span>
+            </div>
+
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-sky-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Keltirgan tushumim</span>
+                    <span class="text-xl bg-slate-800 p-2 rounded-xl text-sky-400 group-hover:scale-110 transition-transform">💰</span>
+                </div>
+                <span class="text-3xl font-black text-sky-400 font-mono block tracking-tight" id="personalRevenue">$0</span>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Doughnut Chart (Personal client status breakdown) -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg flex flex-col justify-between min-h-[350px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-200">Mijozlarim Statusi Taqsimoti</h3>
+                    <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Mening ulushim</span>
+                </div>
+                <div class="flex-grow relative h-64 flex items-center justify-center">
+                    <canvas id="personalStatusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Bar Chart (Recent Call history daily volume) -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg flex flex-col justify-between min-h-[350px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-200">Oxirgi Muzokaralar Faolligi</h3>
+                    <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Haftalik jurnali</span>
+                </div>
+                <div class="flex-grow relative h-64 flex items-center justify-center">
+                    <canvas id="personalActivityChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECENT ACTIVITY AND TODO LIST WIDGET -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Call history table -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-lg p-6 lg:col-span-2">
+                <h3 class="text-lg font-bold text-emerald-400 mb-4 pb-2 border-b border-slate-800/60 flex items-center space-x-2">
+                    <span>📞</span>
+                    <span>Mening Oxirgi Muzokaralarim</span>
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800/40 border-b border-slate-800/60 text-slate-400 text-xs font-bold uppercase">
+                                <th class="p-3">Mijoz</th>
+                                <th class="p-3">Muzokara izohi (Tafsiloti)</th>
+                                <th class="p-3 text-right">Sana va vaqt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentCallsTable">
+                            <tr>
+                                <td colspan="3" class="p-4 text-center text-slate-500">Muzokara qaydlari yuklanmoqda...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TODO LIST WIDGET -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-2xl p-6 shadow-lg flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-emerald-400 mb-4 pb-2 border-b border-slate-800/60 flex items-center justify-between">
+                        <span class="flex items-center space-x-2">
+                            <span>📝</span>
+                            <span>Tezkor Vazifalarim</span>
+                        </span>
+                        <span id="taskProgress" class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">0/0</span>
+                    </h3>
+                    
+                    <!-- Task entry input -->
+                    <div class="flex space-x-2 mb-4">
+                        <input type="text" id="todoInput" placeholder="Yangi reja qo'shing..." class="flex-grow bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-emerald-500 transition duration-200">
+                        <button onclick="addTodoTask()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-3.5 rounded-xl transition flex items-center justify-center text-lg shadow-lg shadow-emerald-500/10">
+                            +
+                        </button>
+                    </div>
+
+                    <!-- Task items -->
+                    <div id="todoContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- Items injected dynamically -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -75,6 +229,25 @@
 
         document.getElementById('welcomeMessage').innerText = `Xush kelibsiz, ${currentUser.full_name}!`;
 
+        function logout() {
+            localStorage.removeItem('crm_user');
+            window.location.href = '/index.html';
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        let employeeCharts = {};
+
         async function loadDashboard() {
             try {
                 // Shaxsiy statistikani olish
@@ -84,7 +257,7 @@
                 document.getElementById('personalTotal').innerText = stats.total;
                 document.getElementById('personalActive').innerText = stats.active;
                 document.getElementById('personalSuccess').innerText = stats.success;
-                document.getElementById('personalRevenue').innerText = `$${parseFloat(stats.revenue || '0').toLocaleString()}`;
+                document.getElementById('personalRevenue').innerText = `$${parseFloat(stats.revenue || '0').toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
                 // Oxirgi qo'ng'iroqlarni olish
                 const callRes = await fetch(`/api/call-history/${currentUser.id}`);
@@ -93,28 +266,203 @@
                 tbody.innerHTML = '';
 
                 if(calls.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500">Hozircha suhbat qaydlari mavjud emas.</td></tr>`;
-                    return;
+                    tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 font-sans">Hozircha muzokara suhbatlari qayd etilmagan.</td></tr>`;
+                } else {
+                    calls.slice(0, 5).forEach(call => {
+                        const formattedDate = new Date(call.created_at).toLocaleString('uz-UZ', {
+                            month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        });
+                        tbody.innerHTML += `
+                            <tr class="border-b border-slate-800/40 hover:bg-slate-800/20 transition-all duration-200">
+                                <td class="p-3 font-semibold text-white flex items-center space-x-1.5">
+                                    <span class="text-slate-500">👤</span>
+                                    <span>${call.client_name}</span>
+                                </td>
+                                <td class="p-3 text-slate-300 text-xs font-medium">${call.note}</td>
+                                <td class="p-3 text-slate-400 text-xs font-mono text-right">${formattedDate}</td>
+                            </tr>
+                        `;
+                    });
                 }
 
-                // Faqat oxirgi 5 tasini ko'rsatamiz
-                calls.slice(0, 5).forEach(call => {
-                    const formattedDate = new Date(call.created_at).toLocaleString('uz-UZ', {
-                        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                    });
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
-                            <td class="p-3 font-semibold text-white">${call.client_name}</td>
-                            <td class="p-3 text-slate-300 text-sm">${call.note}</td>
-                            <td class="p-3 text-slate-400 text-xs">${formattedDate}</td>
-                        </tr>
-                    `;
+                // 1. Shaxsiy Mijozlar statusi Chart
+                const ctxPersonal = document.getElementById('personalStatusChart').getContext('2d');
+                if(employeeCharts.status) employeeCharts.status.destroy();
+                
+                // Muvaffaqiyatli, Aktiv, Boshqalar (Yangi + Rad etilgan)
+                const inactiveClientsCount = Math.max(0, stats.total - stats.active - stats.success);
+
+                employeeCharts.status = new Chart(ctxPersonal, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Jarayonda (Aktiv)', 'Muvaffaqiyatli', 'Boshqalar (Yangi/Rad)'],
+                        datasets: [{
+                            data: [stats.active, stats.success, inactiveClientsCount],
+                            backgroundColor: ['#fbbf24', '#10b981', '#475569'],
+                            borderWidth: 0,
+                            hoverOffset: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { family: 'Plus Jakarta Sans', size: 11 },
+                                    boxWidth: 10,
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // 2. Haftalik Muzokara Faolligi (Bar Chart)
+                // calls ma'lumotlarini kunlar bo'yicha hisoblash
+                const dayCounts = [0, 0, 0, 0, 0, 0, 0]; // Sun - Sat
+                const dayLabels = ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'];
+                
+                calls.forEach(c => {
+                    const d = new Date(c.created_at).getDay();
+                    dayCounts[d]++;
+                });
+
+                // Dushanbadan boshlab chizamiz
+                const reorderedCounts = [...dayCounts.slice(1), dayCounts[0]];
+                const reorderedLabels = [...dayLabels.slice(1), dayLabels[0]];
+
+                const ctxActivity = document.getElementById('personalActivityChart').getContext('2d');
+                if(employeeCharts.activity) employeeCharts.activity.destroy();
+
+                const actGrad = ctxActivity.createLinearGradient(0, 0, 0, 200);
+                actGrad.addColorStop(0, '#10b981');
+                actGrad.addColorStop(1, '#0f766e');
+
+                employeeCharts.activity = new Chart(ctxActivity, {
+                    type: 'bar',
+                    data: {
+                        labels: reorderedLabels,
+                        datasets: [{
+                            label: 'Qayd qilingan suhbatlar soni',
+                            data: reorderedCounts,
+                            backgroundColor: actGrad,
+                            borderRadius: 6,
+                            maxBarThickness: 24
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 9 } } },
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 9 }, stepSize: 1 } }
+                        }
+                    }
                 });
 
             } catch (err) { console.error(err); }
         }
 
-        window.onload = loadDashboard;
+        // ================= TODO LIST (LOCAL STORAGE WIDGET) =================
+        let todoTasks = [];
+
+        function initTodoWidget() {
+            const key = `crm_agent_tasks_${currentUser.id}`;
+            const stored = localStorage.getItem(key);
+            if(stored) {
+                todoTasks = JSON.parse(stored);
+            } else {
+                todoTasks = [
+                    { id: 1, text: "Yangi biriktirilgan leadlarga telefon qilish", done: false },
+                    { id: 2, text: "Ertaga soat 10:00 da haftalik hisobot topshirish", done: true }
+                ];
+                saveTodoTasks();
+            }
+            renderTodoTasks();
+        }
+
+        function saveTodoTasks() {
+            const key = `crm_agent_tasks_${currentUser.id}`;
+            localStorage.setItem(key, JSON.stringify(todoTasks));
+        }
+
+        function renderTodoTasks() {
+            const container = document.getElementById('todoContainer');
+            container.innerHTML = '';
+
+            let doneCount = 0;
+            todoTasks.forEach(task => {
+                if(task.done) doneCount++;
+
+                const div = document.createElement('div');
+                div.className = `flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
+                    task.done 
+                        ? 'bg-slate-950/20 border-slate-900/80 text-slate-500 line-through' 
+                        : 'bg-slate-900/60 border-slate-800 text-slate-200 hover:border-emerald-500/20'
+                }`;
+
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3 flex-grow cursor-pointer" onclick="toggleTaskDone(${task.id})">
+                        <span class="text-sm">${task.done ? '✅' : '⭕'}</span>
+                        <span class="text-xs font-semibold leading-relaxed break-words max-w-[200px]">${task.text}</span>
+                    </div>
+                    <button onclick="deleteTodoTask(${task.id})" class="text-slate-600 hover:text-red-400 transition text-sm px-1.5">
+                        ❌
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('taskProgress').innerText = `${doneCount}/${todoTasks.length}`;
+        }
+
+        function addTodoTask() {
+            const input = document.getElementById('todoInput');
+            const val = input.value.trim();
+            if(!val) return;
+
+            const newTask = {
+                id: Date.now(),
+                text: val,
+                done: false
+            };
+            todoTasks.push(newTask);
+            saveTodoTasks();
+            input.value = '';
+            renderTodoTasks();
+        }
+
+        function toggleTaskDone(id) {
+            const task = todoTasks.find(t => t.id === id);
+            if(task) {
+                task.done = !task.done;
+                saveTodoTasks();
+                renderTodoTasks();
+            }
+        }
+
+        function deleteTodoTask(id) {
+            todoTasks = todoTasks.filter(t => t.id !== id);
+            saveTodoTasks();
+            renderTodoTasks();
+        }
+
+        // input bosilganda Enter tugmasi ishlashi uchun
+        document.getElementById('todoInput').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                addTodoTask();
+            }
+        });
+
+        window.onload = function() {
+            loadDashboard();
+            initTodoWidget();
+        };
     </script>
 </body>
 </html>
