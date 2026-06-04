@@ -120,6 +120,30 @@ app.get('/api/login', async (req, res) => {
     }
 });
 
+
+// ----------------------------------------------------
+// 2a. API: LEADERBOARD (Xodimlar reytingi)
+// ----------------------------------------------------
+app.get('/api/leaderboard', async (req, res) => {
+    try {
+        const queryText = `
+            SELECT u.id, u.full_name, u.department, u.username,
+                   (SELECT COUNT(*) FROM clients c WHERE c.assigned_to = u.id) as client_count,
+                   (SELECT COUNT(*) FROM clients c WHERE c.assigned_to = u.id AND c.status = 'Muvaffaqiyatli') as success_count,
+                   COALESCE((SELECT SUM(f.amount) FROM finance_logs f JOIN clients c ON f.client_id = c.id WHERE c.assigned_to = u.id AND f.type = 'Kirim'), 0) as revenue
+            FROM users u
+            WHERE u.role = 'employee' AND u.is_active = TRUE
+            ORDER BY revenue DESC, success_count DESC, client_count DESC
+            LIMIT 10
+        `;
+        const result = await pool.query(queryText);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Leaderboard SQL Xatolik:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
 // ----------------------------------------------------
 // 3. API: EMPLOYEES (HRM)
 // ----------------------------------------------------
@@ -242,6 +266,27 @@ app.post('/api/global-leads', async (req, res) => {
         res.json({ success: true, client: newClient });
     } catch (err) {
         console.error("Lead qo'shishda xato:", err.message);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+app.put('/api/global-leads/status', async (req, res) => {
+    const { client_id, status } = req.body;
+    try {
+        const result = await pool.query(
+            'UPDATE clients SET status = $1 WHERE id = $2 RETURNING *',
+            [status, client_id]
+        );
+
+        if (result.rows.length > 0) {
+            const client = result.rows[0];
+            await writeAuditLog(1, `Lead (#ID: ${client_id}, ${client.name}) holati "${status}" ga o'zgartirildi.`);
+            res.json({ success: true, client });
+        } else {
+            res.status(404).json({ success: false, message: 'Lead topilmadi' });
+        }
+    } catch (err) {
+        console.error("Lead statusini o'zgartirishda xato:", err.message);
         res.status(500).json({ success: false, error: err.message });
     }
 });

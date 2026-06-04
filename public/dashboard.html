@@ -4,243 +4,238 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Analitika</title>
-    <!-- Chart.js Grafiklarni chizish uchun -->
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --sidebar-bg: #1e293b;
-            --card-bg: #1e293b;
-            --accent-color: #38bdf8;
-            --text-color: #f8fafc;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --logout-color: #ef4444;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseSlow: {
+                            '0%, 100%': { opacity: '0.15', transform: 'scale(1)' },
+                            '50%': { opacity: '0.25', transform: 'scale(1.15)' },
+                        }
+                    }
+                }
+            }
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* SIDEBAR STYLES */
-        .sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 1.5rem;
-        }
-
-        .sidebar-brand h2 {
-            color: var(--accent-color);
-            font-size: 1.5rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            flex-grow: 1;
-        }
-
-        .sidebar-menu li {
-            margin-bottom: 0.5rem;
-        }
-
-        .sidebar-menu a {
-            display: block;
-            padding: 0.75rem 1rem;
-            color: var(--text-color);
-            text-decoration: none;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-        }
-
-        .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: rgba(56, 189, 248, 0.1);
-            color: var(--accent-color);
-            font-weight: 600;
-        }
-
-        .sidebar-footer .btn-logout {
-            width: 100%;
-            padding: 0.75rem;
-            background-color: rgba(239, 68, 68, 0.1);
-            border: 1px solid var(--logout-color);
-            color: var(--logout-color);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .sidebar-footer .btn-logout:hover {
-            background-color: var(--logout-color);
-            color: #fff;
-        }
-
-        /* MAIN CONTENT AREA */
-        .main-content {
-            flex-grow: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 1rem;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-        }
-
-        .user-info {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        /* STATS CARDS */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-title {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        /* CHARTS SECTION */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (max-width: 900px) {
-            .charts-grid { grid-template-columns: 1fr; }
-        }
-
-        .chart-container {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.5rem;
-            height: 400px;
-            position: relative;
-        }
-
-        .chart-container h3 {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            color: var(--text-muted);
-        }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-[#0b0f19] text-slate-100 flex flex-col md:flex-row min-h-screen font-sans overflow-x-hidden relative">
+    
+    <!-- Ambient background glow mesh -->
+    <div class="absolute top-10 left-10 w-96 h-96 bg-sky-500 rounded-full blur-[120px] opacity-15 pointer-events-none animate-pulse-slow"></div>
+    <div class="absolute bottom-10 right-10 w-96 h-96 bg-indigo-600 rounded-full blur-[120px] opacity-15 pointer-events-none animate-pulse-slow" style="animation-delay: 3s;"></div>
 
-    <!-- YON MENYU (SIDEBAR) -->
-    <div class="sidebar">
-        <div class="sidebar-brand">
-            <h2>CRM NextGen</h2>
+    <!-- Mobile Topbar Header -->
+    <div class="md:hidden flex items-center justify-between bg-slate-900/90 border-b border-slate-800/80 p-4 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white font-mono text-xs shadow-md">NG</div>
+            <span class="text-lg font-black tracking-wider text-sky-400">CRM NextGen</span>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="/dashboard.html" class="active">📊 1. Analitika</a></li>
-            <li><a href="/employees.html">👥 2. Xodimlar (HRM)</a></li>
-            <li><a href="/companies.html">🏢 3. Kompaniyalar</a></li>
-            <li><a href="/global-leads.html">🌐 4. Global Leadlar</a></li>
-            <li><a href="/finance.html">💰 5. Moliya</a></li>
-            <li><a href="/audit-logs.html">📜 6. Audit Logs</a></li>
-            <li><a href="/settings.html">⚙️ 7. Sozlamalar</a></li>
-        </ul>
-        <div class="sidebar-footer">
-            <button class="btn-logout" onclick="logout()">Chiqish</button>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white focus:outline-none p-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity duration-300 md:hidden"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 md:flex shrink-0 backdrop-blur-xl">
+        <div>
+            <!-- Brand Info -->
+            <div class="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-800/60 justify-center">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-extrabold text-white font-mono shadow-lg shadow-sky-500/20">NG</div>
+                <div class="flex flex-col">
+                    <span class="text-md font-black tracking-wider text-white">NextGen CRM</span>
+                    <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Admin Control</span>
+                </div>
+            </div>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500 transition-all duration-200">
+                    <span class="text-lg">📊</span>
+                    <span>1. Analitika</span>
+                </a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">👥</span>
+                    <span>2. Xodimlar (HRM)</span>
+                </a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">🏢</span>
+                    <span>3. Kompaniyalar</span>
+                </a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">🌐</span>
+                    <span>4. Global Leadlar</span>
+                </a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">💰</span>
+                    <span>5. Moliya</span>
+                </a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">📜</span>
+                    <span>6. Audit Logs</span>
+                </a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">⚙️</span>
+                    <span>7. Sozlamalar</span>
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Sidebar Footer -->
+        <div class="pt-4 border-t border-slate-800/60">
+            <button onclick="logout()" class="w-full py-3 bg-red-500/10 hover:bg-red-600 border border-red-500/20 text-red-500 hover:text-white rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2">
+                <span>🚪</span>
+                <span>Chiqish</span>
+            </button>
         </div>
     </div>
 
-    <!-- ASOSIY HISOBOT KISMI -->
-    <div class="main-content">
-        <div class="header">
-            <h1>Vizual Analitika Dashboard</h1>
-            <div class="user-info" id="adminName">Admin: Yuklanmoqda...</div>
-        </div>
-
-        <!-- STATISTIKA KARTALARI -->
-        <div class="stats-grid">
-            <div class="card">
-                <span class="card-title">Jami Leadlar</span>
-                <span class="card-value" id="statTotal">0</span>
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-6 md:p-8 overflow-y-auto w-full relative z-10">
+        <!-- Top bar Welcome -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 pb-5 border-b border-slate-800/80 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Analitika Dashboard</h1>
+                <p class="text-sm text-slate-400 mt-1">CRM tizimi bo'yicha umumiy sotuvlar, leadlar dinamikasi va xodimlar reytingi.</p>
             </div>
-            <div class="card">
-                <span class="card-title">Jarayondagilar</span>
-                <span class="card-value" style="color: #fbbf24;" id="statActive">0</span>
-            </div>
-            <div class="card">
-                <span class="card-title">Muvaffaqiyatli Bitimlar</span>
-                <span class="card-value" style="color: #34d399;" id="statSuccess">0</span>
-            </div>
-            <div class="card">
-                <span class="card-title">Umumiy Tushum (Kirim)</span>
-                <span class="card-value" style="color: #38bdf8;" id="statRevenue">$0</span>
+            <div class="flex items-center space-x-3 bg-slate-900/60 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-slate-800/80">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Tizim Faol</span>
+                <div class="w-[1px] h-4 bg-slate-800"></div>
+                <span class="text-sm font-semibold text-slate-300 font-mono" id="adminName">Admin: Yuklanmoqda...</span>
             </div>
         </div>
 
-        <!-- GRAFIKLAR (CHART.JS) -->
-        <div class="charts-grid">
-            <!-- Dinamik Sotuv Grafigi -->
-            <div class="chart-container">
-                <h3>Sotuvlar Dinamikasi va Oylik Ko'rsatkich</h3>
-                <canvas id="lineChart"></canvas>
+        <!-- STATS CARDS -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 animate-fade-in">
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-sky-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Jami Leadlar</span>
+                    <span class="text-xl bg-sky-500/10 p-2 rounded-xl text-sky-400 group-hover:scale-110 transition-transform">🌐</span>
+                </div>
+                <span class="text-3xl font-black text-white font-mono block tracking-tight" id="statTotal">0</span>
+                <span class="text-[11px] text-slate-500 font-medium block mt-2">Barcha kelib tushgan so'rovlar</span>
+            </div>
+            
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-amber-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Jarayondagilar</span>
+                    <span class="text-xl bg-amber-500/10 p-2 rounded-xl text-amber-400 group-hover:scale-110 transition-transform">⏳</span>
+                </div>
+                <span class="text-3xl font-black text-amber-400 font-mono block tracking-tight" id="statActive">0</span>
+                <span class="text-[11px] text-slate-500 font-medium block mt-2">Muzokara olib borilayotganlar</span>
+            </div>
+            
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-emerald-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Muvaffaqiyatli Bitimlar</span>
+                    <span class="text-xl bg-emerald-500/10 p-2 rounded-xl text-emerald-400 group-hover:scale-110 transition-transform">🤝</span>
+                </div>
+                <span class="text-3xl font-black text-emerald-400 font-mono block tracking-tight" id="statSuccess">0</span>
+                <span class="text-[11px] text-slate-500 font-medium block mt-2">Shartnoma tuzilgan mijozlar</span>
             </div>
 
-            <!-- Leadlar holati (Donut) -->
-            <div class="chart-container">
-                <h3>Leadlar Taqsimoti</h3>
-                <canvas id="doughnutChart"></canvas>
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl hover:-translate-y-1 hover:border-indigo-500/30 transition-all duration-300 group shadow-lg">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Umumiy Tushum (Kirim)</span>
+                    <span class="text-xl bg-indigo-500/10 p-2 rounded-xl text-indigo-400 group-hover:scale-110 transition-transform">💰</span>
+                </div>
+                <span class="text-3xl font-black text-indigo-400 font-mono block tracking-tight" id="statRevenue">$0</span>
+                <span class="text-[11px] text-slate-500 font-medium block mt-2">Kirim amallarining jami summasi</span>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Line Chart (Sales dynamics) -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg lg:col-span-2 flex flex-col justify-between min-h-[350px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-200">Sotuvlar Dinamikasi va Oylik Ko'rsatkich</h3>
+                    <span class="text-[11px] bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Trend</span>
+                </div>
+                <div class="flex-grow relative h-64">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Doughnut Chart (Leads status) -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg flex flex-col justify-between min-h-[350px]">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-200">Leadlar Taqsimoti</h3>
+                    <span class="text-[11px] bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Statuslar</span>
+                </div>
+                <div class="flex-grow relative h-64 flex items-center justify-center">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD & AGENTS COMPARISON -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Leaderboard Table -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg lg:col-span-2">
+                <div class="flex items-center justify-between mb-6 pb-2 border-b border-slate-800/60">
+                    <div class="flex items-center space-x-3">
+                        <span class="text-2xl">🏆</span>
+                        <h3 class="font-extrabold text-slate-100 text-lg">Top Xodimlar Reytingi (Leaderboard)</h3>
+                    </div>
+                    <span class="text-[11px] bg-amber-500/10 text-amber-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Faollik</span>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 text-xs font-bold uppercase border-b border-slate-800/60 bg-slate-800/20">
+                                <th class="p-3">O'rin</th>
+                                <th class="p-3">Xodim (Agent)</th>
+                                <th class="p-3">Bo'lim</th>
+                                <th class="p-3 text-center">Jami Mijozlari</th>
+                                <th class="p-3 text-center">Bitimlar (Success)</th>
+                                <th class="p-3 text-right">Keltirgan Tushumi ($)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboardTableBody">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-slate-500">Yuklanmoqda...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Agent Revenue Comparison Chart -->
+            <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-6 rounded-2xl shadow-lg flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-200">Xodimlar Keltirgan Tushumi</h3>
+                    <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">Daromad</span>
+                </div>
+                <div class="flex-grow relative h-64 flex items-center justify-center">
+                    <canvas id="revenueBarChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Xavfsizlik tekshiruvi: Tizimga kirilmagan bo'lsa login sahifasiga qaytaradi
+        // Xavfsizlik tekshiruvi
         const user = JSON.parse(localStorage.getItem('crm_user'));
         if (!user || user.role !== 'admin') {
             window.location.href = '/index.html';
@@ -253,71 +248,198 @@
             window.location.href = '/index.html';
         }
 
-        // Backenddan real statistik ma'lumotlarni yuklash va grafikni chizish
+        // Responsive sidebar toggler
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        let charts = {};
+
+        // Dashboard ma'lumotlarini yuklash va grafiklarni chizish
         async function loadDashboardData() {
             try {
                 const response = await fetch('/api/dashboard');
                 const data = await response.json();
 
-                // Kartalarga qiymat berish
+                // Stat kartalari
                 document.getElementById('statTotal').innerText = data.total;
                 document.getElementById('statActive').innerText = data.active;
                 document.getElementById('statSuccess').innerText = data.success;
-                document.getElementById('statRevenue').innerText = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'USD' }).format(data.revenue);
+                document.getElementById('statRevenue').innerText = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(data.revenue);
 
-                // 1. Line Chart chizish (Trend uchun namunaviy oylar bilan)
+                // 1. Line Chart chizish
                 const ctxLine = document.getElementById('lineChart').getContext('2d');
-                new Chart(ctxLine, {
+                
+                // Line chart gradient yaratish
+                const lineGrad = ctxLine.createLinearGradient(0, 0, 0, 200);
+                lineGrad.addColorStop(0, 'rgba(14, 165, 233, 0.4)');
+                lineGrad.addColorStop(1, 'rgba(14, 165, 233, 0.0)');
+
+                if(charts.line) charts.line.destroy();
+                charts.line = new Chart(ctxLine, {
                     type: 'line',
                     data: {
                         labels: ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'Iyun'],
                         datasets: [{
                             label: 'Muvaffaqiyatli Bitimlar ($)',
-                            data: [1200, 1900, data.revenue > 0 ? data.revenue : 3000, 5000, 4200, 6800],
-                            borderColor: '#38bdf8',
-                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                            borderWidth: 3,
+                            data: [1200, 1900, data.revenue > 0 ? data.revenue : 3000, 4200, 5000, 6800],
+                            borderColor: '#0ea5e9',
+                            backgroundColor: lineGrad,
+                            borderWidth: 3.5,
                             fill: true,
-                            tension: 0.4
+                            tension: 0.4,
+                            pointBackgroundColor: '#0ea5e9',
+                            pointHoverRadius: 7
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { labels: { color: '#f8fafc' } } },
+                        plugins: { 
+                            legend: { display: false }
+                        },
                         scales: {
-                            x: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
-                            y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } }
+                            x: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans' } } },
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.3)' }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans' } } }
                         }
                     }
                 });
 
-                // 2. Doughnut Chart chizish (Leadlar holati statusga qarab)
+                // 2. Doughnut Chart chizish
                 const ctxDonut = document.getElementById('doughnutChart').getContext('2d');
-                new Chart(ctxDonut, {
+                
+                if(charts.donut) charts.donut.destroy();
+                charts.donut = new Chart(ctxDonut, {
                     type: 'doughnut',
                     data: {
                         labels: ['Yangi', 'Jarayonda', 'Muvaffaqiyatli', 'Yopilgan'],
                         datasets: [{
                             data: [data.total - data.active - data.success, data.active, data.success, 0],
-                            backgroundColor: ['#64748b', '#fbbf24', '#34d399', '#f87171'],
-                            borderWidth: 1,
-                            borderColor: '#1e293b'
+                            backgroundColor: ['#64748b', '#fbbf24', '#10b981', '#f87171'],
+                            borderWidth: 0,
+                            hoverOffset: 6
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { position: 'bottom', labels: { color: '#f8fafc' } } }
+                        cutout: '70%',
+                        plugins: { 
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    color: '#cbd5e1', 
+                                    font: { family: 'Plus Jakarta Sans', size: 11 },
+                                    boxWidth: 10,
+                                    padding: 15
+                                } 
+                            } 
+                        }
+                    }
+                });
+
+                // Leaderboard ma'lumotlarini yuklash
+                await loadLeaderboard();
+
+            } catch (err) {
+                console.error("Dashboard yuklashda xato:", err);
+            }
+        }
+
+        // Leaderboard reytingini yuklash va Bar chartni chizish
+        async function loadLeaderboard() {
+            try {
+                const response = await fetch('/api/leaderboard');
+                const leaders = await response.json();
+                
+                const tbody = document.getElementById('leaderboardTableBody');
+                tbody.innerHTML = '';
+
+                if (leaders.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">Faol xodimlar topilmadi.</td></tr>`;
+                    return;
+                }
+
+                const names = [];
+                const revenues = [];
+
+                leaders.forEach((item, index) => {
+                    names.push(item.full_name.split(' ')[0]); // Faqat ismini olamiz bar chart uchun
+                    revenues.push(parseFloat(item.revenue));
+
+                    let medal = `<span class="text-slate-400 font-bold font-mono">#${index + 1}</span>`;
+                    let highlightBg = 'border-b border-slate-800/40 hover:bg-slate-800/10';
+                    
+                    if (index === 0) {
+                        medal = '🥇';
+                        highlightBg = 'bg-amber-500/5 hover:bg-amber-500/10 border-b border-slate-800/60 font-semibold';
+                    } else if (index === 1) {
+                        medal = '🥈';
+                    } else if (index === 2) {
+                        medal = '🥉';
+                    }
+
+                    const formattedRevenue = new Intl.NumberFormat('uz-UZ', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(item.revenue);
+
+                    tbody.innerHTML += `
+                        <tr class="transition duration-150 ${highlightBg}">
+                            <td class="p-3 text-center">${medal}</td>
+                            <td class="p-3 font-semibold text-white">${item.full_name}</td>
+                            <td class="p-3 text-slate-400 text-sm">${item.department || '-'}</td>
+                            <td class="p-3 text-center text-slate-300 font-mono text-sm">${item.client_count}</td>
+                            <td class="p-3 text-center text-emerald-400 font-bold font-mono text-sm">${item.success_count}</td>
+                            <td class="p-3 text-right text-sky-400 font-black font-mono">${formattedRevenue}</td>
+                        </tr>
+                    `;
+                });
+
+                // 3. Bar Chart (Top xodimlar daromadi)
+                const ctxBar = document.getElementById('revenueBarChart').getContext('2d');
+                
+                // Bar chart gradient
+                const barGrad = ctxBar.createLinearGradient(0, 0, 0, 250);
+                barGrad.addColorStop(0, '#10b981');
+                barGrad.addColorStop(1, '#0284c7');
+
+                if(charts.bar) charts.bar.destroy();
+                charts.bar = new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: names.length > 0 ? names : ['Xodim A', 'Xodim B', 'Xodim C'],
+                        datasets: [{
+                            label: 'Keltirgan tushumi ($)',
+                            data: revenues.length > 0 ? revenues : [0, 0, 0],
+                            backgroundColor: barGrad,
+                            borderRadius: 8,
+                            maxBarThickness: 30
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 10 } } },
+                            y: { grid: { color: 'rgba(51, 65, 85, 0.2)' }, ticks: { color: '#94a3b8', font: { family: 'Plus Jakarta Sans', size: 9 } } }
+                        }
                     }
                 });
 
             } catch (err) {
-                console.error("Ma'lumot yuklashda xatolik:", err);
+                console.error("Leaderboard yuklashda xato:", err);
             }
         }
 
-        // Sahifa yuklanganda ishga tushirish
         window.onload = loadDashboardData;
     </script>
 </body>

@@ -4,111 +4,325 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Global Leadlar Nazorati</title>
+    <!-- Google Fonts Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        pulseSlow: {
+                            '0%, 100%': { opacity: '0.15', transform: 'scale(1)' },
+                            '50%': { opacity: '0.25', transform: 'scale(1.15)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-slate-950 text-slate-100 flex min-h-screen font-sans">
+<body class="bg-[#0b0f19] text-slate-100 flex flex-col md:flex-row min-h-screen font-sans overflow-x-hidden relative">
+    
+    <!-- Ambient background glow mesh -->
+    <div class="absolute top-10 left-10 w-96 h-96 bg-sky-500 rounded-full blur-[120px] opacity-15 pointer-events-none animate-pulse-slow"></div>
 
-    <div class="w-64 bg-slate-900 text-white flex flex-col justify-between min-h-screen border-r border-slate-800 p-6 shrink-0">
-        <div>
-            <h1 class="text-2xl font-black tracking-wider text-sky-400 mb-8 text-center">CRM NextGen</h1>
-            <nav class="space-y-2">
-                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📊 1. Analitika</span></a>
-                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>👥 2. Xodimlar (HRM)</span></a>
-                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>🏢 3. Kompaniyalar</span></a>
-                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500"><span>🌐 4. Global Leadlar</span></a>
-                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>💰 5. Moliya</span></a>
-                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>📜 6. Audit Logs</span></a>
-                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-400 hover:bg-slate-800/50 transition"><span>⚙️ 7. Sozlamalar</span></a>
-            </nav>
+    <!-- Mobile Topbar Header -->
+    <div class="md:hidden flex items-center justify-between bg-slate-900/90 border-b border-slate-800/80 p-4 sticky top-0 z-40 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-bold text-white font-mono text-xs shadow-md">NG</div>
+            <span class="text-lg font-black tracking-wider text-sky-400">CRM NextGen</span>
         </div>
-        <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-2.5 bg-red-500/10 hover:bg-red-500 border border-red-500 text-red-500 hover:text-white rounded-lg transition">Chiqish</button>
+        <button onclick="toggleSidebar()" class="text-slate-400 hover:text-white focus:outline-none p-1.5 rounded-lg bg-slate-800/50 border border-slate-700/50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
     </div>
 
-    <div class="flex-grow p-8 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8 border-b border-slate-800 pb-4">
-            <div>
-                <h1 class="text-3xl font-bold">Global Leadlar va Taqsimot jurnali</h1>
-                <p class="text-sm text-slate-400 mt-1">Kelib tushgan buyurtmalarni xodimlarga taqsimlang yoki holatini kuzating.</p>
+    <!-- Mobile Sidebar Backdrop -->
+    <div id="sidebarBackdrop" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 z-40 hidden backdrop-blur-sm transition-opacity duration-300 md:hidden"></div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar fixed inset-y-0 left-0 z-50 w-64 bg-slate-900/90 border-r border-slate-800/80 p-6 flex flex-col justify-between transform -translate-x-full transition-transform duration-300 ease-in-out md:static md:translate-x-0 md:flex shrink-0 backdrop-blur-xl">
+        <div>
+            <!-- Brand Info -->
+            <div class="flex items-center space-x-3 mb-8 pb-4 border-b border-slate-800/60 justify-center">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center font-extrabold text-white font-mono shadow-lg shadow-sky-500/20">NG</div>
+                <div class="flex flex-col">
+                    <span class="text-md font-black tracking-wider text-white">NextGen CRM</span>
+                    <span class="text-[10px] font-bold text-sky-400 uppercase tracking-widest">Admin Control</span>
+                </div>
             </div>
-            <button onclick="toggleLeadModal(true)" class="bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold px-5 py-2.5 rounded-lg transition">+ Yangi Lead</button>
+            
+            <!-- Navigation Links -->
+            <nav class="space-y-1">
+                <a href="/dashboard.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">📊</span>
+                    <span>1. Analitika</span>
+                </a>
+                <a href="/employees.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">👥</span>
+                    <span>2. Xodimlar (HRM)</span>
+                </a>
+                <a href="/companies.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">🏢</span>
+                    <span>3. Kompaniyalar</span>
+                </a>
+                <a href="/global-leads.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-sky-500/10 text-sky-400 font-semibold border-l-4 border-sky-500 transition-all duration-200">
+                    <span class="text-lg">🌐</span>
+                    <span>4. Global Leadlar</span>
+                </a>
+                <a href="/finance.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">💰</span>
+                    <span>5. Moliya</span>
+                </a>
+                <a href="/audit-logs.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">📜</span>
+                    <span>6. Audit Logs</span>
+                </a>
+                <a href="/settings.html" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-sky-400 hover:bg-sky-500/5 transition-all duration-200">
+                    <span class="text-lg">⚙️</span>
+                    <span>7. Sozlamalar</span>
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Sidebar Footer -->
+        <div class="pt-4 border-t border-slate-800/60">
+            <button onclick="localStorage.removeItem('crm_user'); window.location.href='/index.html';" class="w-full py-3 bg-red-500/10 hover:bg-red-600 border border-red-500/20 text-red-500 hover:text-white rounded-xl font-bold transition duration-300 flex items-center justify-center space-x-2">
+                <span>🚪</span>
+                <span>Chiqish</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-grow p-6 md:p-8 overflow-y-auto w-full relative z-10">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-5 border-b border-slate-800/80 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">Global Leadlar</h1>
+                <p class="text-sm text-slate-400 mt-1">Kelib tushgan yangi mijozlar ro'yxati, ularni xodimlarga biriktirish va nazorat jurnali.</p>
+            </div>
+            <button onclick="toggleLeadModal(true)" class="bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg shadow-sky-500/10 hover:shadow-sky-500/20 hover:-translate-y-0.5 active:scale-95 transition-all duration-300 text-sm flex items-center space-x-2">
+                <span>➕</span>
+                <span>Yangi Lead Qo'shish</span>
+            </button>
         </div>
 
-        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-slate-800/50 text-slate-400 text-sm uppercase">
-                        <th class="p-4">Mijoz ismi</th>
-                        <th class="p-4">Telefon</th>
-                        <th class="p-4">Kompaniya</th>
-                        <th class="p-4">Byudjet</th>
-                        <th class="p-4">Status</th>
-                        <th class="p-4">Mas'ul Xodim (Agent)</th>
-                    </tr>
-                </thead>
-                <tbody id="leadsTableBody">
+        <!-- SEARCH, FILTERS & VIEW TOGGLE PANEL -->
+        <div class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 p-4 rounded-2xl mb-6 flex flex-col lg:flex-row items-center justify-between gap-4">
+            <!-- Search bar -->
+            <div class="relative w-full sm:w-72">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500 text-sm">🔍</span>
+                <input type="text" id="leadSearch" oninput="filterLeads()" placeholder="Ism, telefon yoki kompaniya..." class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300">
+            </div>
+
+            <!-- View Switch Tabs -->
+            <div class="flex items-center bg-slate-950 p-1.5 rounded-xl border border-slate-800/80 w-full sm:w-auto">
+                <button onclick="switchView('table')" id="btnViewTable" class="w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 bg-sky-500 text-slate-950">
+                    📋 Jadval ko'rinishi
+                </button>
+                <button onclick="switchView('kanban')" id="btnViewKanban" class="w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 text-slate-400 hover:text-white">
+                    📊 Kanban Pipeline
+                </button>
+            </div>
+        </div>
+
+        <!-- TABLE VIEW -->
+        <div id="tableView" class="bg-slate-900/40 backdrop-blur-md border border-slate-800/80 rounded-2xl overflow-hidden shadow-2xl animate-fade-in">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/40 border-b border-slate-800/80 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="p-4">Mijoz Ismi</th>
+                            <th class="p-4">Telefon</th>
+                            <th class="p-4">Kompaniya</th>
+                            <th class="p-4">Byudjet</th>
+                            <th class="p-4">Holati (Status)</th>
+                            <th class="p-4">Mas'ul Xodim (Agent)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody">
+                        <tr>
+                            <td colspan="6" class="p-8 text-center text-slate-500 font-medium">Yuklanmoqda...</td>
+                        </tr>
                     </tbody>
-            </table>
+                </table>
+            </div>
+        </div>
+
+        <!-- KANBAN BOARD VIEW -->
+        <div id="kanbanView" class="hidden grid grid-cols-1 md:grid-cols-4 gap-6 min-h-[500px]">
+            <!-- Column 1: Yangi -->
+            <div class="bg-slate-900/25 border border-slate-800/60 rounded-2xl p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-2">
+                    <span class="text-xs font-black uppercase tracking-widest text-slate-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-sky-400 rounded-full"></span>
+                        <span>Yangi Leadlar</span>
+                    </span>
+                    <span id="countYangi" class="bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded-full text-xs font-mono">0</span>
+                </div>
+                <div id="colYangi" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Yangi')" class="flex-grow space-y-3 min-h-[400px] transition-colors duration-200">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+
+            <!-- Column 2: Jarayonda -->
+            <div class="bg-slate-900/25 border border-slate-800/60 rounded-2xl p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-2">
+                    <span class="text-xs font-black uppercase tracking-widest text-amber-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-amber-400 rounded-full animate-ping"></span>
+                        <span>Jarayonda</span>
+                    </span>
+                    <span id="countJarayonda" class="bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded-full text-xs font-mono">0</span>
+                </div>
+                <div id="colJarayonda" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Jarayonda')" class="flex-grow space-y-3 min-h-[400px] transition-colors duration-200">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+
+            <!-- Column 3: Muvaffaqiyatli -->
+            <div class="bg-slate-900/25 border border-slate-800/60 rounded-2xl p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-2">
+                    <span class="text-xs font-black uppercase tracking-widest text-emerald-400 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full"></span>
+                        <span>Muvaffaqiyatli</span>
+                    </span>
+                    <span id="countMuvaffaqiyatli" class="bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded-full text-xs font-mono">0</span>
+                </div>
+                <div id="colMuvaffaqiyatli" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Muvaffaqiyatli')" class="flex-grow space-y-3 min-h-[400px] transition-colors duration-200">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+
+            <!-- Column 4: Rad etildi / Yopildi -->
+            <div class="bg-slate-900/25 border border-slate-800/60 rounded-2xl p-4 flex flex-col">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-2">
+                    <span class="text-xs font-black uppercase tracking-widest text-rose-500 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 bg-rose-500 rounded-full"></span>
+                        <span>Rad Etilganlar</span>
+                    </span>
+                    <span id="countRadEtildi" class="bg-slate-800 text-slate-400 font-bold px-2 py-0.5 rounded-full text-xs font-mono">0</span>
+                </div>
+                <div id="colRadEtildi" ondragover="allowDrop(event)" ondrop="handleDrop(event, 'Rad etildi')" class="flex-grow space-y-3 min-h-[400px] transition-colors duration-200">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- LEAD MODAL -->
-    <div id="leadModal" class="fixed inset-0 bg-black/70 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 w-full max-w-md p-6 rounded-xl shadow-2xl">
-            <h3 class="text-xl font-bold mb-4 text-sky-400">Yangi Lead Qo'shish</h3>
+    <div id="leadModal" class="fixed inset-0 bg-black/75 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm animate-fade-in">
+        <div class="bg-slate-900/90 border border-slate-800/80 w-full max-w-md p-8 rounded-3xl shadow-2xl relative">
+            <div class="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-sky-500/30 to-transparent"></div>
+            
+            <h3 class="text-xl font-bold mb-5 text-sky-400 flex items-center space-x-2">
+                <span>🌐</span>
+                <span>Yangi Lead Qo'shish</span>
+            </h3>
+            
             <form id="addLeadForm" class="space-y-4">
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Mijoz Ismi (F.I.SH)</label>
-                    <input type="text" id="leadName" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Mijoz Ismi (F.I.SH)</label>
+                    <input type="text" id="leadName" required placeholder="Masalan: G'ofurov Jamshid" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-600 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm">
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Telefon raqami</label>
-                    <input type="text" id="leadPhone" required class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white" placeholder="Masalan: +998901234567">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Telefon raqami</label>
+                    <input type="text" id="leadPhone" required placeholder="Masalan: +998901234567" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-600 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm font-mono">
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Kompaniya (Ixtiyoriy)</label>
-                    <select id="leadCompany" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Kompaniya (B2B)</label>
+                    <select id="leadCompany" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm">
                         <option value="">Shaxsiy (B2C) / Kompaniyasiz</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Dastlabki Byudjet (USD)</label>
-                    <input type="number" id="leadBudget" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white" placeholder="0">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Dastlabki Byudjet (USD)</label>
+                    <input type="number" id="leadBudget" placeholder="0" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-600 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm font-mono">
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Mas'ul Xodim (Agent)</label>
-                    <select id="leadAssignee" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Mas'ul Xodim (Agent)</label>
+                    <select id="leadAssignee" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm">
                         <option value="">Biriktirilmagan</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1">Holati (Status)</label>
-                    <select id="leadStatus" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 focus:border-sky-500 outline-none text-white">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1.5 tracking-wider">Holati (Status)</label>
+                    <select id="leadStatus" class="w-full bg-slate-950/80 border border-slate-800 text-slate-100 rounded-xl p-3 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-300 text-sm">
                         <option value="Yangi">Yangi</option>
                         <option value="Jarayonda">Jarayonda</option>
                         <option value="Muvaffaqiyatli">Muvaffaqiyatli</option>
                     </select>
                 </div>
-                <div class="flex space-x-3 pt-2">
-                    <button type="button" onclick="toggleLeadModal(false)" class="w-1/2 bg-slate-800 hover:bg-slate-700 py-2.5 rounded-lg transition">Bekor qilish</button>
-                    <button type="submit" class="w-1/2 bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-lg transition">Saqlash</button>
+                
+                <div class="flex space-x-3 pt-4 border-t border-slate-800/80 mt-6">
+                    <button type="button" onclick="toggleLeadModal(false)" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-xl transition duration-300 text-sm">Bekor qilish</button>
+                    <button type="submit" class="w-1/2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg shadow-sky-500/20 transition duration-300 text-sm">Saqlash</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        // Xavfsizlik nazorati
         const userCheck = JSON.parse(localStorage.getItem('crm_user'));
         if(!userCheck || userCheck.role !== 'admin') window.location.href = '/index.html';
 
         let employeesList = [];
+        let cachedLeads = [];
+        let currentView = 'table'; // 'table' yoki 'kanban'
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
 
         function toggleLeadModal(show) {
             document.getElementById('leadModal').classList.toggle('hidden', !show);
         }
 
+        // Ko'rinishlarni almashtirish
+        function switchView(view) {
+            currentView = view;
+            const tableView = document.getElementById('tableView');
+            const kanbanView = document.getElementById('kanbanView');
+            const btnTable = document.getElementById('btnViewTable');
+            const btnKanban = document.getElementById('btnViewKanban');
+
+            if (view === 'table') {
+                tableView.classList.remove('hidden');
+                kanbanView.classList.add('hidden');
+                btnTable.className = "w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 bg-sky-500 text-slate-950";
+                btnKanban.className = "w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 text-slate-400 hover:text-white";
+            } else {
+                tableView.classList.add('hidden');
+                kanbanView.classList.remove('hidden');
+                btnTable.className = "w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 text-slate-400 hover:text-white";
+                btnKanban.className = "w-1/2 sm:w-auto px-4 py-2 text-xs font-bold uppercase rounded-lg transition-all duration-200 bg-sky-500 text-slate-950";
+            }
+            renderView();
+        }
+
+        // Sahifani ishga tushirish
         async function initPage() {
             try {
-                // Xodimlarni yuklab olamiz (Select menyular uchun)
+                // Xodimlarni select menyular uchun yuklash
                 const empRes = await fetch('/api/employees');
                 employeesList = await empRes.json();
                 
@@ -120,7 +334,7 @@
                     }
                 });
 
-                // Kompaniyalarni yuklab olamiz
+                // Kompaniyalarni select menyular uchun yuklash
                 const compRes = await fetch('/api/companies');
                 const companies = await compRes.json();
                 const leadCompanySelect = document.getElementById('leadCompany');
@@ -129,58 +343,233 @@
                     leadCompanySelect.innerHTML += `<option value="${c.id}">${c.company_name}</option>`;
                 });
 
-                // Keyin leadlarni yuklaymiz
-                loadGlobalLeads();
-            } catch (err) { console.error(err); }
+                // Leadlarni yuklash
+                await loadGlobalLeads();
+            } catch (err) { console.error("Sahifani tayyorlashda xato:", err); }
         }
 
         async function loadGlobalLeads() {
             try {
                 const res = await fetch('/api/global-leads');
-                const leads = await res.json();
-                const tbody = document.getElementById('leadsTableBody');
-                tbody.innerHTML = '';
+                cachedLeads = await res.json();
+                renderView();
+            } catch (err) { console.error("Leadlarni yuklashda xato:", err); }
+        }
 
-                leads.forEach(lead => {
-                    // Mas'ul shaxs select qutisini yaratish
-                    let options = `<option value="">Biriktirilmagan</option>`;
-                    employeesList.forEach(emp => {
+        function renderView() {
+            if (currentView === 'table') {
+                renderTable(cachedLeads);
+            } else {
+                renderKanban(cachedLeads);
+            }
+        }
+
+        // 1. Jadval ko'rinishini chizish
+        function renderTable(list) {
+            const tbody = document.getElementById('leadsTableBody');
+            tbody.innerHTML = '';
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-slate-500 font-medium">Hech qanday lead topilmadi.</td></tr>`;
+                return;
+            }
+
+            list.forEach(lead => {
+                let options = `<option value="">Biriktirilmagan</option>`;
+                employeesList.forEach(emp => {
+                    if (emp.role === 'employee') {
                         options += `<option value="${emp.id}" ${lead.assigned_to === emp.id ? 'selected' : ''}>${emp.full_name}</option>`;
-                    });
-
-                    tbody.innerHTML += `
-                        <tr class="border-b border-slate-800/60 hover:bg-slate-800/20 transition">
-                            <td class="p-4 font-semibold text-white">${lead.name}</td>
-                            <td class="p-4 text-slate-300">${lead.phone}</td>
-                            <td class="p-4 text-slate-400">${lead.company_name || 'B2C (Shaxsiy)'}</td>
-                            <td class="p-4 text-amber-400 font-medium">$${parseFloat(lead.budget).toLocaleString()}</td>
-                            <td class="p-4">
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">${lead.status}</span>
-                            </td>
-                            <td class="p-4">
-                                <select onchange="assignLead(${lead.id}, this.value)" class="bg-slate-950 border border-slate-800 text-sm rounded-lg p-1.5 focus:border-sky-500 outline-none text-slate-300">
-                                    ${options}
-                                </select>
-                            </td>
-                        </tr>
-                    `;
+                    }
                 });
+
+                let statusBadge = '';
+                switch (lead.status) {
+                    case 'Yangi':
+                        statusBadge = 'bg-sky-500/10 text-sky-400 border border-sky-500/20';
+                        break;
+                    case 'Jarayonda':
+                        statusBadge = 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+                        break;
+                    case 'Muvaffaqiyatli':
+                        statusBadge = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
+                        break;
+                    case 'Rad etildi':
+                        statusBadge = 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
+                        break;
+                    default:
+                        statusBadge = 'bg-slate-800 text-slate-400';
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-800/40 hover:bg-slate-800/20 transition-all duration-200">
+                        <td class="p-4 font-bold text-white flex items-center space-x-2">
+                            <span class="text-slate-500">👤</span>
+                            <span>${lead.name}</span>
+                        </td>
+                        <td class="p-4 text-slate-300 font-mono text-sm">${lead.phone}</td>
+                        <td class="p-4 text-slate-400 text-sm">${lead.company_name || '<span class="text-slate-600 italic">B2C (Shaxsiy)</span>'}</td>
+                        <td class="p-4 text-sky-400 font-bold font-mono">$${parseFloat(lead.budget).toLocaleString()}</td>
+                        <td class="p-4">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider ${statusBadge}">
+                                ${lead.status}
+                            </span>
+                        </td>
+                        <td class="p-4">
+                            <select onchange="assignLead(${lead.id}, this.value)" class="bg-slate-950/80 border border-slate-800 text-slate-300 text-sm rounded-xl p-2 focus:outline-none focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all duration-200">
+                                ${options}
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 2. Kanban Pipeline ko'rinishini chizish
+        function renderKanban(list) {
+            const cols = {
+                'Yangi': document.getElementById('colYangi'),
+                'Jarayonda': document.getElementById('colJarayonda'),
+                'Muvaffaqiyatli': document.getElementById('colMuvaffaqiyatli'),
+                'Rad etildi': document.getElementById('colRadEtildi')
+            };
+
+            // Tozalash
+            Object.values(cols).forEach(col => col.innerHTML = '');
+
+            // Hisoblagichlar
+            const counts = { 'Yangi': 0, 'Jarayonda': 0, 'Muvaffaqiyatli': 0, 'Rad etildi': 0 };
+
+            list.forEach(lead => {
+                // status "Rad etildi" yoki "Yopildi" kelsa, uni Rad etildi ustuniga yo'naltiramiz
+                let targetStatus = lead.status;
+                if(targetStatus === 'Yopildi' || targetStatus === 'Rad etildi') {
+                    targetStatus = 'Rad etildi';
+                }
+
+                if(!cols[targetStatus]) return;
+
+                counts[targetStatus]++;
+
+                // Assigned agent nomi
+                let assigneeName = 'Biriktirilmagan';
+                if(lead.assigned_to) {
+                    const found = employeesList.find(emp => emp.id === lead.assigned_to);
+                    if(found) assigneeName = found.full_name;
+                }
+
+                const card = document.createElement('div');
+                card.id = `lead-card-${lead.id}`;
+                card.draggable = true;
+                card.className = "bg-slate-900/60 border border-slate-800 hover:border-sky-500/30 p-4 rounded-xl shadow-lg cursor-grab active:cursor-grabbing hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden group";
+                card.setAttribute('ondragstart', `handleDragStart(event, ${lead.id})`);
+                card.setAttribute('ondragend', `handleDragEnd(event)`);
+
+                card.innerHTML = `
+                    <div class="absolute top-0 left-0 w-1.5 h-full ${
+                        targetStatus === 'Yangi' ? 'bg-sky-500' :
+                        targetStatus === 'Jarayonda' ? 'bg-amber-400' :
+                        targetStatus === 'Muvaffaqiyatli' ? 'bg-emerald-500' : 'bg-rose-500'
+                    }"></div>
+                    <div class="flex flex-col space-y-2">
+                        <div class="font-bold text-white group-hover:text-sky-400 transition-colors text-sm">${lead.name}</div>
+                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">${lead.company_name || 'B2C (Shaxsiy)'}</div>
+                        <div class="flex justify-between items-center text-xs font-semibold pt-1 border-t border-slate-800/40">
+                            <span class="text-sky-400 font-mono font-bold">$${parseFloat(lead.budget).toLocaleString()}</span>
+                            <span class="text-slate-400 truncate max-w-[120px]" title="${assigneeName}">👤 ${assigneeName.split(' ')[0]}</span>
+                        </div>
+                    </div>
+                `;
+                cols[targetStatus].appendChild(card);
+            });
+
+            // Hisoblagichlarni yangilash
+            document.getElementById('countYangi').innerText = counts['Yangi'];
+            document.getElementById('countJarayonda').innerText = counts['Jarayonda'];
+            document.getElementById('countMuvaffaqiyatli').innerText = counts['Muvaffaqiyatli'];
+            document.getElementById('countRadEtildi').innerText = counts['Rad etildi'];
+        }
+
+        // Drag and Drop yordamchi funksiyalari
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function handleDragStart(ev, leadId) {
+            ev.dataTransfer.setData("text/plain", leadId);
+            document.getElementById(`lead-card-${leadId}`).classList.add('opacity-45');
+        }
+
+        function handleDragEnd(ev) {
+            ev.currentTarget.classList.remove('opacity-45');
+        }
+
+        async function handleDrop(ev, status) {
+            ev.preventDefault();
+            const leadId = ev.dataTransfer.getData("text/plain");
+            if (!leadId) return;
+
+            // Mahalliy state-ni yangilash
+            const leadIndex = cachedLeads.findIndex(l => l.id === parseInt(leadId));
+            if (leadIndex > -1) {
+                const oldStatus = cachedLeads[leadIndex].status;
+                if (oldStatus === status) return;
+                
+                cachedLeads[leadIndex].status = status;
+                renderView(); // UI darhol yangilanadi
+
+                try {
+                    // API ga so'rov jo'natish
+                    const res = await fetch('/api/global-leads/status', {
+                        method: 'PUT',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ client_id: parseInt(leadId), status: status })
+                    });
+                    const data = await res.json();
+                    if (!data.success) {
+                        alert("Serverda holatni saqlashda xatolik!");
+                        await loadGlobalLeads(); // Xatolik bo'lsa qaytadan yuklash
+                    }
+                } catch (err) {
+                    console.error("Status yangilashda xato:", err);
+                    await loadGlobalLeads();
+                }
+            }
+        }
+
+        // Leadlarni biriktirish (Xodimga)
+        async function assignLead(clientId, userId) {
+            try {
+                const res = await fetch('/api/global-leads/assign', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ client_id: clientId, user_id: userId ? parseInt(userId) : null })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    console.log("Mijoz xodimga biriktirildi.");
+                    // Keshni yangilaymiz
+                    const found = cachedLeads.find(l => l.id === clientId);
+                    if(found) found.assigned_to = userId ? parseInt(userId) : null;
+                } else { alert("Xatolik yuz berdi!"); }
             } catch (err) { console.error(err); }
         }
 
-        async function assignLead(clientId, userId) {
-            if(!userId) return;
-            const res = await fetch('/api/global-leads/assign', {
-                method: 'PUT',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ client_id: clientId, user_id: parseInt(userId) })
-            });
-            const data = await res.json();
-            if(data.success) {
-                console.log("Xodim muvaffaqiyatli biriktirildi");
-            } else { alert("Xatolik yuz berdi!"); }
+        // Qidiruv va filtrlar
+        function filterLeads() {
+            const query = document.getElementById('leadSearch').value.toLowerCase().trim();
+            const filtered = cachedLeads.filter(lead => 
+                lead.name.toLowerCase().includes(query) ||
+                lead.phone.toLowerCase().includes(query) ||
+                (lead.company_name && lead.company_name.toLowerCase().includes(query))
+            );
+            if (currentView === 'table') {
+                renderTable(filtered);
+            } else {
+                renderKanban(filtered);
+            }
         }
 
+        // Yangi lead yaratish formasi
         document.getElementById('addLeadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payload = {
@@ -201,7 +590,7 @@
             if(data.success) {
                 toggleLeadModal(false);
                 document.getElementById('addLeadForm').reset();
-                initPage();
+                await loadGlobalLeads();
             } else { alert('Xatolik yuz berdi!'); }
         });
 
